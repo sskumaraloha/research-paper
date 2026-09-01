@@ -25,16 +25,18 @@
                         <div th:if="${infoMessage}" class="alert alert-success" role="alert"
                              th:text="${infoMessage}">OTP sent.</div>
 
-                        <div th:if="${#fields.hasGlobalErrors('verifyResetOtpRequest')}"
-                             class="alert alert-danger" role="alert">
-                            <p class="mb-0" th:each="err : ${#fields.globalErrors('verifyResetOtpRequest')}"
-                               th:text="${err}">Error</p>
-                        </div>
 
                         <div id="resendFeedback" class="alert d-none" role="alert"></div>
 
                         <form th:action="@{/verify-reset-otp}" th:object="${verifyResetOtpRequest}"
                               method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
 
                             <div class="mb-3">
                                 <label for="phoneNumber" class="form-label">Phone number</label>

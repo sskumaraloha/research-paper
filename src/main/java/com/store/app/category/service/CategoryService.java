@@ -1,5 +1,6 @@
 package com.store.app.category.service;
 
+import com.store.app.category.dto.CategoryOptionResponse;
 import com.store.app.category.dto.CategoryRequest;
 import com.store.app.category.dto.CategoryResponse;
 import com.store.app.category.dto.CategoryTreeResponse;
@@ -50,6 +51,9 @@ public interface CategoryService {
 
     /** Public storefront tree: active categories only, inactive branches pruned. */
     List<CategoryTreeResponse> getActiveCategoryTree();
+
+    /** Active categories flattened depth-first, labels indented by depth. */
+    List<CategoryOptionResponse> getActiveCategoryOptions();
 
     /**
      * Public lookup of one active category (with its active subtree).

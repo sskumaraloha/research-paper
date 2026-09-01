@@ -29,17 +29,19 @@
                              th:text="${verificationSuccess}">Verified.</div>
 
                         <!-- Business errors (invalid/expired OTP, rate limits) -->
-                        <div th:if="${#fields.hasGlobalErrors('verifyOtpRequest')}"
-                             class="alert alert-danger" role="alert">
-                            <p class="mb-0" th:each="err : ${#fields.globalErrors('verifyOtpRequest')}"
-                               th:text="${err}">Error</p>
-                        </div>
 
                         <!-- Feedback from the resend button (filled by JavaScript) -->
                         <div id="resendFeedback" class="alert d-none" role="alert"></div>
 
                         <form th:action="@{/verify-otp}" th:object="${verifyOtpRequest}"
                               method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
 
                             <input type="hidden" th:field="*{purpose}">
 

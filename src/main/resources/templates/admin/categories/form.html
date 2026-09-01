@@ -26,14 +26,16 @@
                     <div class="card-body p-4">
                         <h1 class="h4 fw-bold mb-4" th:text="${formTitle}">Create category</h1>
 
-                        <div th:if="${#fields.hasGlobalErrors('categoryRequest')}"
-                             class="alert alert-danger" role="alert">
-                            <p class="mb-0" th:each="err : ${#fields.globalErrors('categoryRequest')}"
-                               th:text="${err}">Error</p>
-                        </div>
 
                         <form th:action="@{${formAction}}" th:object="${categoryRequest}"
                               method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
 
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name</label>

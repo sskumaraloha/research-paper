@@ -7,6 +7,9 @@ import com.store.app.common.storage.FileStorageService;
 import com.store.app.exception.BusinessValidationException;
 import com.store.app.exception.DuplicateResourceException;
 import com.store.app.exception.ResourceNotFoundException;
+import com.store.app.product.dto.ProductCardResponse;
+import com.store.app.product.dto.ProductDetailResponse;
+import com.store.app.product.dto.ProductFilterRequest;
 import com.store.app.product.dto.ProductRequest;
 import com.store.app.product.dto.ProductResponse;
 import com.store.app.product.entity.Product;
@@ -26,8 +29,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -165,6 +172,103 @@ public class ProductServiceImpl implements ProductService {
         Product saved = productRepository.save(product);
         fileStorageService.delete(imageUrl);
         return productMapper.toResponse(saved);
+    }
+
+    // ------------------------------------------------------------------
+    // Storefront
+    // ------------------------------------------------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ProductCardResponse> browseProducts(ProductFilterRequest filter) {
+        Pageable pageable = PageRequest.of(
+                Math.max(filter.page(), 0),
+                Math.min(Math.max(filter.size(), 1), MAX_PAGE_SIZE),
+                resolveSort(filter.sort()));
+
+        boolean filterCategory = false;
+        List<Long> categoryIds = List.of(-1L);
+        if (StringUtils.hasText(filter.category())) {
+            filterCategory = true;
+            categoryIds = categoryRepository.findBySlugAndActiveTrue(filter.category())
+                    .map(category -> List.copyOf(collectSubtreeIds(category.getId())))
+                    // Unknown category slug matches nothing rather than everything.
+                    .orElse(List.of(-1L));
+        }
+
+        String term = StringUtils.hasText(filter.search()) ? filter.search().trim() : null;
+        String brand = StringUtils.hasText(filter.brand()) ? filter.brand().trim() : null;
+
+        Page<ProductCardResponse> result = productRepository.browse(
+                        term, filterCategory, categoryIds, brand,
+                        filter.minPrice(), filter.maxPrice(), pageable)
+                .map(productMapper::toCard);
+        return PageResponse.from(result);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProductDetail(String slug) {
+        Product product = productRepository.findBySlugAndActiveTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product not found: " + slug));
+        return productMapper.toDetail(product);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductCardResponse> getRelatedProducts(Long categoryId, Long excludeProductId) {
+        return productRepository
+                .findTop4ByActiveTrueAndCategoryIdAndIdNotOrderByCreatedAtDescIdDesc(
+                        categoryId, excludeProductId)
+                .stream().map(productMapper::toCard).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductCardResponse> getFeaturedProducts() {
+        return productRepository
+                .findTop8ByActiveTrueAndDiscountPriceIsNotNullOrderByCreatedAtDescIdDesc()
+                .stream().map(productMapper::toCard).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductCardResponse> getNewProducts() {
+        return productRepository.findTop8ByActiveTrueOrderByCreatedAtDescIdDesc()
+                .stream().map(productMapper::toCard).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductCardResponse> getPopularProducts() {
+        return productRepository.findTop8ByActiveTrueOrderByStockQuantityDescIdDesc()
+                .stream().map(productMapper::toCard).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getActiveBrands() {
+        return productRepository.findActiveBrands();
+    }
+
+    /** Ids of a category and all its descendants (for subtree filtering). */
+    private Set<Long> collectSubtreeIds(Long rootId) {
+        var all = categoryRepository.findAll();
+        Set<Long> subtree = new HashSet<>();
+        Deque<Long> pending = new ArrayDeque<>();
+        pending.push(rootId);
+        while (!pending.isEmpty()) {
+            Long currentId = pending.pop();
+            if (!subtree.add(currentId)) {
+                continue;
+            }
+            all.stream()
+                    .filter(c -> c.getParentCategory() != null
+                            && currentId.equals(c.getParentCategory().getId()))
+                    .forEach(c -> pending.push(c.getId()));
+        }
+        return subtree;
     }
 
     // ------------------------------------------------------------------

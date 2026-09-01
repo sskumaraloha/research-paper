@@ -33,14 +33,16 @@
                     <div class="card-body p-4">
                         <h1 class="h4 fw-bold mb-4" th:text="${formTitle}">Create product</h1>
 
-                        <div th:if="${#fields.hasGlobalErrors('productRequest')}"
-                             class="alert alert-danger" role="alert">
-                            <p class="mb-0" th:each="err : ${#fields.globalErrors('productRequest')}"
-                               th:text="${err}">Error</p>
-                        </div>
 
                         <form th:action="@{${formAction}}" th:object="${productRequest}"
                               method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
 
                             <div class="row g-3">
                                 <div class="col-12 col-md-8">

@@ -1,0 +1,21 @@
+# Test profile: in-memory H2 so the full application context (including
+# Thymeleaf rendering) can be exercised without a MySQL server.
+spring:
+  datasource:
+    url: jdbc:h2:mem:storedb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    # Test-only signing key.
+    secret: dGVzdC1vbmx5LWp3dC1zZWNyZXQta2V5LWZvci1pbnRlZ3JhdGlvbi10ZXN0cy0wMTIzNDU2Nzg5
+
+otp:
+  provider: dummy

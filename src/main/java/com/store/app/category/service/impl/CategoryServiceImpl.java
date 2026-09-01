@@ -1,5 +1,6 @@
 package com.store.app.category.service.impl;
 
+import com.store.app.category.dto.CategoryOptionResponse;
 import com.store.app.category.dto.CategoryRequest;
 import com.store.app.category.dto.CategoryResponse;
 import com.store.app.category.dto.CategoryTreeResponse;
@@ -129,6 +130,25 @@ public class CategoryServiceImpl implements CategoryService {
                 .stream()
                 .map(categoryMapper::toTree)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryOptionResponse> getActiveCategoryOptions() {
+        List<CategoryOptionResponse> options = new java.util.ArrayList<>();
+        for (CategoryTreeResponse root : getActiveCategoryTree()) {
+            flattenOptions(root, 0, options);
+        }
+        return options;
+    }
+
+    private void flattenOptions(CategoryTreeResponse node, int depth,
+                                List<CategoryOptionResponse> out) {
+        out.add(new CategoryOptionResponse(node.slug(),
+                "— ".repeat(depth) + node.name()));
+        for (CategoryTreeResponse child : node.children()) {
+            flattenOptions(child, depth + 1, out);
+        }
     }
 
     @Override

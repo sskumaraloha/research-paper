@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>General Store | Groceries, Clothing &amp; Daily Essentials</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1">
+
+    <!-- Hero -->
+    <section class="hero-section py-5">
+        <div class="container py-4">
+            <div class="row align-items-center g-4">
+                <div class="col-12 col-lg-7 text-center text-lg-start">
+                    <h1 class="display-5 fw-bold">
+                        Everything your home needs,<br>in one store
+                    </h1>
+                    <p class="lead text-muted">
+                        Groceries, clothing for the whole family, household items,
+                        personal care, and daily essentials — delivered with care.
+                    </p>
+                    <a th:href="@{/products}" class="btn btn-dark btn-lg mt-2">Shop now</a>
+                </div>
+                <div class="col-12 col-lg-5 text-center">
+                    <span style="font-size: 9rem;" aria-hidden="true">&#128722;</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="py-5" th:if="${!#lists.isEmpty(categories)}">
+        <div class="container">
+            <h2 class="h3 fw-bold mb-4">Shop by category</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3 col-xl-2" th:each="cat : ${categories}">
+                    <a th:href="@{/products(category=${cat.slug})}"
+                       class="card h-100 text-decoration-none text-center border-0 shadow-sm category-tile">
+                        <div class="card-body">
+                            <img th:if="${cat.image != null}" th:src="@{${cat.image}}" alt=""
+                                 class="rounded-circle mb-2" width="56" height="56"
+                                 style="object-fit: cover;">
+                            <span th:if="${cat.image == null}" class="fs-2 d-block mb-1"
+                                  aria-hidden="true">&#128717;</span>
+                            <span class="fw-semibold text-dark d-block" th:text="${cat.name}">Grocery</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured (on offer) -->
+    <section class="py-5 bg-light" th:if="${!#lists.isEmpty(featuredProducts)}">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 fw-bold mb-0">Deals &amp; offers</h2>
+                <a th:href="@{/products(sort='price_asc')}" class="small">View all</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3" th:each="product : ${featuredProducts}">
+                    <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New arrivals -->
+    <section class="py-5" th:if="${!#lists.isEmpty(newProducts)}">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 fw-bold mb-0">New arrivals</h2>
+                <a th:href="@{/products(sort='newest')}" class="small">View all</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3" th:each="product : ${newProducts}">
+                    <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular -->
+    <section class="py-5 bg-light" th:if="${!#lists.isEmpty(popularProducts)}">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 fw-bold mb-0">Popular right now</h2>
+                <a th:href="@{/products}" class="small">View all</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3" th:each="product : ${popularProducts}">
+                    <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Empty store fallback -->
+    <section class="py-5 text-center"
+             th:if="${#lists.isEmpty(featuredProducts) and #lists.isEmpty(newProducts)
+                     and #lists.isEmpty(popularProducts)}">
+        <div class="container py-5">
+            <span class="display-1" aria-hidden="true">&#128230;</span>
+            <h2 class="h4 fw-bold mt-3">The shelves are being stocked</h2>
+            <p class="text-muted">Products will appear here as soon as they are added.</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

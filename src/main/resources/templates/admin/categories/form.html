@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Category Form | Admin</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/admin/categories}">Categories</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:text="${formTitle}">Create category</li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h1 class="h4 fw-bold mb-4" th:text="${formTitle}">Create category</h1>
+
+                        <div th:if="${#fields.hasGlobalErrors('categoryRequest')}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors('categoryRequest')}"
+                               th:text="${err}">Error</p>
+                        </div>
+
+                        <form th:action="@{${formAction}}" th:object="${categoryRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" id="name" th:field="*{name}"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                       placeholder="e.g. Men's Clothing" required
+                                       minlength="2" maxlength="100">
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('name')}"
+                                     th:errors="*{name}">Name error</div>
+                                <div class="invalid-feedback"
+                                     th:unless="${#fields.hasErrors('name')}">
+                                    Please enter a name (2-100 characters).
+                                </div>
+                                <div class="form-text">
+                                    The URL slug is generated automatically from the name.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="parentId" class="form-label">Parent category</label>
+                                <select id="parentId" th:field="*{parentId}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('parentId')} ? 'is-invalid'">
+                                    <option value="">None — top-level category</option>
+                                    <option th:each="option : ${parentOptions}"
+                                            th:value="${option.id}"
+                                            th:text="${option.parentName != null}
+                                                     ? ${option.name + ' (under ' + option.parentName + ')'}
+                                                     : ${option.name}">
+                                        Men
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('parentId')}"
+                                     th:errors="*{parentId}">Parent error</div>
+                                <div class="form-text">
+                                    Choose a parent to create a subcategory.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    Description <span class="text-muted">(optional)</span>
+                                </label>
+                                <textarea id="description" th:field="*{description}"
+                                          class="form-control" rows="3" maxlength="500"
+                                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('description')}"
+                                     th:errors="*{description}">Description error</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="image" class="form-label">
+                                    Image URL <span class="text-muted">(optional)</span>
+                                </label>
+                                <input type="text" id="image" th:field="*{image}"
+                                       class="form-control" maxlength="255"
+                                       th:classappend="${#fields.hasErrors('image')} ? 'is-invalid'"
+                                       placeholder="/images/categories/men.jpg">
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('image')}"
+                                     th:errors="*{image}">Image error</div>
+                            </div>
+
+                            <div class="form-check form-switch mb-4">
+                                <input type="checkbox" id="active" th:field="*{active}"
+                                       class="form-check-input" role="switch">
+                                <label for="active" class="form-check-label">
+                                    Active (visible to customers)
+                                </label>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-dark">Save category</button>
+                                <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

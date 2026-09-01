@@ -21,6 +21,14 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
 
+# OTP settings (delivery provider and limits)
+otp:
+  provider: dummy          # dummy = log to console; e.g. twilio once integrated
+  expiry-minutes: 5
+  max-attempts: 5
+  resend-cooldown-seconds: 60
+  max-requests-per-hour: 5
+
 server:
   port: 8080
   error:

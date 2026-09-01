@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- ============================================================
+     Admin sidebar.
+     Usage: <aside th:replace="~{fragments/admin-layout :: sidebar('dashboard')}">
+     The argument marks the active menu entry.
+     ============================================================ -->
+<aside th:fragment="sidebar(active)"
+       class="col-12 col-lg-2 bg-dark text-white p-0 admin-sidebar">
+    <div class="p-3 border-bottom border-secondary">
+        <a th:href="@{/admin/dashboard}" class="text-white text-decoration-none fw-bold">
+            <span class="text-warning">&#128722;</span> Store Admin
+        </a>
+    </div>
+    <nav class="nav flex-column py-2" aria-label="Admin navigation">
+        <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'dashboard'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/dashboard}">&#128200; Dashboard</a>
+        <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'categories'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/categories}">&#128193; Categories</a>
+        <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'products'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/products}">&#128230; Products</a>
+        <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'inventory'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/inventory}">&#128202; Inventory</a>
+        <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'transactions'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/inventory/transactions}">&#128220; Stock History</a>
+    </nav>
+</aside>
+
+<!-- ============================================================
+     Admin top navigation bar.
+     Usage: <header th:replace="~{fragments/admin-layout :: topbar('Dashboard')}">
+     ============================================================ -->
+<header th:fragment="topbar(title)"
+        class="d-flex justify-content-between align-items-center bg-white border-bottom
+               px-4 py-3 flex-wrap gap-2">
+    <h1 class="h4 fw-bold mb-0" th:text="${title}">Dashboard</h1>
+    <div class="d-flex align-items-center gap-3">
+        <a th:href="@{/}" class="text-decoration-none small">&#8592; View store</a>
+        <span class="text-muted small" sec:authentication="name">admin</span>
+        <form th:action="@{/logout}" method="post" class="d-inline mb-0">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</header>
+
+</body>
+</html>

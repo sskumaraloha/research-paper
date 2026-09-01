@@ -26,6 +26,8 @@ One Spring Boot application containing both the customer-facing shop (Thymeleaf 
 
 ## 3. Architecture
 
+Full design rationale — requirements analysis, architecture decisions, data model, security design, the checkout flow, and the phased build order — lives in **[docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md)**.
+
 Feature-based modular monolith under `com.store.app`:
 
 ```

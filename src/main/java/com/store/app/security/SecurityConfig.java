@@ -22,7 +22,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        http
+                // Stateless JSON APIs are exempt from CSRF; browser-facing
+                // Thymeleaf forms keep CSRF protection (token injected by th:action).
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 

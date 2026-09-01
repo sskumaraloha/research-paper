@@ -1,0 +1,27 @@
+package com.store.app.auth.validation;
+
+import com.store.app.auth.dto.RegistrationRequest;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+public class PasswordMatchesValidator
+        implements ConstraintValidator<PasswordMatches, RegistrationRequest> {
+
+    @Override
+    public boolean isValid(RegistrationRequest request, ConstraintValidatorContext context) {
+        // Leave null/blank handling to the field-level @NotBlank constraints.
+        if (request.getPassword() == null || request.getConfirmPassword() == null) {
+            return true;
+        }
+
+        boolean matches = request.getPassword().equals(request.getConfirmPassword());
+        if (!matches) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(
+                            context.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode("confirmPassword")
+                    .addConstraintViolation();
+        }
+        return matches;
+    }
+}

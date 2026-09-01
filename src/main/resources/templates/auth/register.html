@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Register | Store Management System</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <span class="fs-1" aria-hidden="true">&#128722;</span>
+                            <h1 class="h3 fw-bold mt-2">Create your account</h1>
+                            <p class="text-muted mb-0">Join the store to start shopping</p>
+                        </div>
+
+                        <!-- Success message after redirect -->
+                        <div th:if="${registrationSuccess}" class="alert alert-success" role="alert"
+                             th:text="${registrationSuccess}">
+                            Registration successful.
+                        </div>
+
+                        <!-- Non-field (global) errors -->
+                        <div th:if="${#fields.hasGlobalErrors('registrationRequest')}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors('registrationRequest')}"
+                               th:text="${err}">Error</p>
+                        </div>
+
+                        <form th:action="@{/register}" th:object="${registrationRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-sm-6">
+                                    <label for="firstName" class="form-label">First name</label>
+                                    <input type="text" id="firstName" th:field="*{firstName}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
+                                           placeholder="John" required minlength="2" maxlength="50"
+                                           pattern="[A-Za-z][A-Za-z .'\-]*">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('firstName')}"
+                                         th:errors="*{firstName}">First name error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('firstName')}">
+                                        Please enter a valid first name (letters only, at least 2 characters).
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-sm-6">
+                                    <label for="lastName" class="form-label">Last name</label>
+                                    <input type="text" id="lastName" th:field="*{lastName}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
+                                           placeholder="Doe" required minlength="1" maxlength="50"
+                                           pattern="[A-Za-z][A-Za-z .'\-]*">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('lastName')}"
+                                         th:errors="*{lastName}">Last name error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('lastName')}">
+                                        Please enter a valid last name (letters only).
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="phoneNumber" class="form-label">Phone number</label>
+                                    <input type="tel" id="phoneNumber" th:field="*{phoneNumber}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'"
+                                           placeholder="10-digit mobile number" required
+                                           pattern="[0-9]{10}" inputmode="numeric" maxlength="10">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('phoneNumber')}"
+                                         th:errors="*{phoneNumber}">Phone error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('phoneNumber')}">
+                                        Please enter exactly 10 digits.
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Email address</label>
+                                    <input type="email" id="email" th:field="*{email}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                           placeholder="you@example.com" required maxlength="100">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('email')}"
+                                         th:errors="*{email}">Email error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('email')}">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" id="password" th:field="*{password}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                           required minlength="8" maxlength="64"
+                                           autocomplete="new-password">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('password')}"
+                                         th:errors="*{password}">Password error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('password')}">
+                                        At least 8 characters with uppercase, lowercase, digit and special character.
+                                    </div>
+                                    <div class="form-text">
+                                        Minimum 8 characters, including uppercase, lowercase, a digit
+                                        and a special character (e.g. @, #, !).
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="confirmPassword" class="form-label">Confirm password</label>
+                                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                           required autocomplete="new-password"
+                                           data-match-target="password">
+                                    <div class="invalid-feedback"
+                                         th:if="${#fields.hasErrors('confirmPassword')}"
+                                         th:errors="*{confirmPassword}">Confirm password error</div>
+                                    <div class="invalid-feedback"
+                                         th:unless="${#fields.hasErrors('confirmPassword')}">
+                                        Passwords do not match.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 d-grid mt-4">
+                                    <button type="submit" class="btn btn-dark btn-lg">Create account</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <p class="text-center text-muted small mt-3">
+                    Already have an account? Login will be available soon.
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

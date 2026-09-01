@@ -34,10 +34,11 @@ public class UserServiceImpl implements UserService {
         String email = request.email().toLowerCase().trim();
 
         if (userRepository.existsByEmail(email)) {
-            throw new DuplicateResourceException("Email is already registered: " + email);
+            throw new DuplicateResourceException("email",
+                    "Email is already registered: " + email);
         }
         if (userRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new DuplicateResourceException(
+            throw new DuplicateResourceException("phoneNumber",
                     "Phone number is already registered: " + request.phoneNumber());
         }
 
@@ -85,11 +86,12 @@ public class UserServiceImpl implements UserService {
 
         String newEmail = request.email().toLowerCase().trim();
         if (!user.getEmail().equals(newEmail) && userRepository.existsByEmail(newEmail)) {
-            throw new DuplicateResourceException("Email is already registered: " + newEmail);
+            throw new DuplicateResourceException("email",
+                    "Email is already registered: " + newEmail);
         }
         if (!user.getPhoneNumber().equals(request.phoneNumber())
                 && userRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new DuplicateResourceException(
+            throw new DuplicateResourceException("phoneNumber",
                     "Phone number is already registered: " + request.phoneNumber());
         }
 

@@ -57,7 +57,10 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="password" class="form-label">Password</label>
+                                <div class="d-flex justify-content-between">
+                                    <label for="password" class="form-label">Password</label>
+                                    <a th:href="@{/forgot-password}" class="small">Forgot password?</a>
+                                </div>
                                 <input type="password" id="password" name="password"
                                        class="form-control" required
                                        autocomplete="current-password">

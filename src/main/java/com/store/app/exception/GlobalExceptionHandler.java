@@ -39,6 +39,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException ex,
+                                                                 HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(OtpException.class)
     public ResponseEntity<ErrorResponse> handleOtp(OtpException ex,
                                                    HttpServletRequest request) {

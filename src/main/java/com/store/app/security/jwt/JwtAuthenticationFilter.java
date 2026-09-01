@@ -19,6 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * Authenticates REST API requests carrying a {@code Authorization: Bearer}
@@ -59,7 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             StoreUserDetails userDetails =
                     userDetailsService.loadUserByUsername(claims.getSubject());
 
-            if (userDetails.isEnabled() && !userDetails.requiresPhoneVerification()) {
+            if (userDetails.isEnabled()
+                    && !userDetails.requiresPhoneVerification()
+                    && !issuedBeforePasswordChange(claims, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
@@ -72,5 +78,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * A password change revokes all previously issued tokens: any JWT
+     * whose issue time predates the change is rejected.
+     */
+    private boolean issuedBeforePasswordChange(Claims claims, StoreUserDetails userDetails) {
+        LocalDateTime passwordChangedAt = userDetails.getUser().getPasswordChangedAt();
+        Date issuedAt = claims.getIssuedAt();
+        if (passwordChangedAt == null || issuedAt == null) {
+            return false;
+        }
+        Instant changedAt = passwordChangedAt.atZone(ZoneId.systemDefault()).toInstant();
+        return issuedAt.toInstant().isBefore(changedAt);
     }
 }

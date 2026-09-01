@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,6 +65,13 @@ public class User extends BaseEntity {
 
     @Column(name = "phone_verified", nullable = false)
     private boolean phoneVerified;
+
+    /**
+     * When the password was last changed. JWTs issued before this moment
+     * are rejected, so a password reset revokes all outstanding tokens.
+     */
+    @Column(name = "password_changed_at")
+    private LocalDateTime passwordChangedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

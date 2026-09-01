@@ -1,14 +1,13 @@
 package com.store.app.auth.validation;
 
-import com.store.app.auth.dto.RegistrationRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordMatchesValidator
-        implements ConstraintValidator<PasswordMatches, RegistrationRequest> {
+        implements ConstraintValidator<PasswordMatches, PasswordConfirmable> {
 
     @Override
-    public boolean isValid(RegistrationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(PasswordConfirmable request, ConstraintValidatorContext context) {
         // Leave null/blank handling to the field-level @NotBlank constraints.
         if (request.getPassword() == null || request.getConfirmPassword() == null) {
             return true;

@@ -13,6 +13,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param maxAttempts           maximum verification attempts per OTP
  * @param resendCooldownSeconds minimum delay between two OTP requests
  * @param maxRequestsPerHour    maximum OTPs issued per phone/purpose per hour
+ * @param resetTokenExpiryMinutes lifetime of the password-reset token issued
+ *                                after successful FORGOT_PASSWORD verification
  */
 @ConfigurationProperties(prefix = "otp")
 public record OtpProperties(
@@ -20,6 +22,7 @@ public record OtpProperties(
         @DefaultValue("5") int expiryMinutes,
         @DefaultValue("5") int maxAttempts,
         @DefaultValue("60") long resendCooldownSeconds,
-        @DefaultValue("5") int maxRequestsPerHour
+        @DefaultValue("5") int maxRequestsPerHour,
+        @DefaultValue("10") int resetTokenExpiryMinutes
 ) {
 }

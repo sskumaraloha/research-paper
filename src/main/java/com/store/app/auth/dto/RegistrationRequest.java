@@ -1,5 +1,6 @@
 package com.store.app.auth.dto;
 
+import com.store.app.auth.validation.PasswordConfirmable;
 import com.store.app.auth.validation.PasswordMatches;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @PasswordMatches
-public class RegistrationRequest {
+public class RegistrationRequest implements PasswordConfirmable {
 
     @NotBlank(message = "First name is required")
     @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")

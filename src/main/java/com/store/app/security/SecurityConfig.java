@@ -78,7 +78,8 @@ public class SecurityConfig {
                 .authenticationProvider(daoAuthenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/health", "/login", "/register",
-                                "/verify-otp", "/error").permitAll()
+                                "/verify-otp", "/forgot-password", "/verify-reset-otp",
+                                "/reset-password", "/error").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")

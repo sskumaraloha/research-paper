@@ -7,6 +7,7 @@ import com.store.app.common.storage.FileStorageService;
 import com.store.app.exception.BusinessValidationException;
 import com.store.app.exception.DuplicateResourceException;
 import com.store.app.exception.ResourceNotFoundException;
+import com.store.app.inventory.service.InventoryService;
 import com.store.app.product.dto.ProductCardResponse;
 import com.store.app.product.dto.ProductDetailResponse;
 import com.store.app.product.dto.ProductFilterRequest;
@@ -48,6 +49,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final FileStorageService fileStorageService;
+    private final InventoryService inventoryService;
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
@@ -72,7 +74,9 @@ public class ProductServiceImpl implements ProductService {
                 request.getMinimumStockLevel(),
                 request.isActive()
         );
-        return productMapper.toResponse(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        inventoryService.initializeInventory(saved);
+        return productMapper.toResponse(saved);
     }
 
     @Override
@@ -98,11 +102,14 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(request.getPrice());
         product.setDiscountPrice(request.getDiscountPrice());
         product.setCostPrice(request.getCostPrice());
-        product.setStockQuantity(request.getStockQuantity());
-        product.setMinimumStockLevel(request.getMinimumStockLevel());
         product.setActive(request.isActive());
 
-        return productMapper.toResponse(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        // Stock and minimum level are owned by the inventory module: a stock
+        // change from the product form becomes an ADJUSTMENT transaction.
+        inventoryService.syncFromProductEdit(
+                saved, request.getStockQuantity(), request.getMinimumStockLevel());
+        return productMapper.toResponse(saved);
     }
 
     @Override
@@ -112,6 +119,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductImage::getImageUrl)
                 .toList();
 
+        inventoryService.deleteInventoryForProduct(id);
         productRepository.delete(product);
         imageUrls.forEach(fileStorageService::delete);
     }

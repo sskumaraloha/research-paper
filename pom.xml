@@ -73,6 +73,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- OpenAPI / Swagger UI for the REST APIs -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
         <!-- Thymeleaf integration with Spring Security (sec: attributes) -->
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>

@@ -8,6 +8,7 @@ import com.store.app.category.entity.Category;
 import com.store.app.category.mapper.CategoryMapper;
 import com.store.app.category.repository.CategoryRepository;
 import com.store.app.category.service.CategoryService;
+import com.store.app.common.util.SlugUtils;
 import com.store.app.exception.InvalidCategoryHierarchyException;
 import com.store.app.exception.OperationNotAllowedException;
 import com.store.app.exception.ResourceNotFoundException;
@@ -17,12 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.text.Normalizer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -192,6 +191,12 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> getSubtreeIds(Long categoryId) {
+        return collectSubtreeIds(categoryRepository.findAll(), categoryId);
+    }
+
     /** Ids of the given category plus all its descendants. */
     private Set<Long> collectSubtreeIds(List<Category> all, Long rootId) {
         Set<Long> subtree = new HashSet<>();
@@ -227,12 +232,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private String slugify(String input) {
-        String normalized = Normalizer.normalize(input.trim(), Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "");
-        String slug = normalized.toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("(^-+|-+$)", "");
-        return slug.isEmpty() ? "category" : slug;
+        return SlugUtils.slugify(input, "category");
     }
 
     private String normalize(String value) {

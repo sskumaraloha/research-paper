@@ -3,8 +3,10 @@ package com.store.app.product.service.impl;
 import com.store.app.cart.service.CartService;
 import com.store.app.category.entity.Category;
 import com.store.app.category.repository.CategoryRepository;
+import com.store.app.category.service.CategoryService;
 import com.store.app.common.dto.PageResponse;
 import com.store.app.common.storage.FileStorageService;
+import com.store.app.common.util.SlugUtils;
 import com.store.app.exception.BusinessValidationException;
 import com.store.app.exception.DuplicateResourceException;
 import com.store.app.exception.ResourceNotFoundException;
@@ -32,13 +34,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.text.Normalizer;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +47,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
     private final ProductMapper productMapper;
     private final FileStorageService fileStorageService;
     private final InventoryService inventoryService;
@@ -208,7 +206,8 @@ public class ProductServiceImpl implements ProductService {
         if (StringUtils.hasText(filter.category())) {
             filterCategory = true;
             categoryIds = categoryRepository.findBySlugAndActiveTrue(filter.category())
-                    .map(category -> List.copyOf(collectSubtreeIds(category.getId())))
+                    .map(category -> List.copyOf(
+                            categoryService.getSubtreeIds(category.getId())))
                     // Unknown category slug matches nothing rather than everything.
                     .orElse(List.of(-1L));
         }
@@ -269,25 +268,6 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findActiveBrands();
     }
 
-    /** Ids of a category and all its descendants (for subtree filtering). */
-    private Set<Long> collectSubtreeIds(Long rootId) {
-        var all = categoryRepository.findAll();
-        Set<Long> subtree = new HashSet<>();
-        Deque<Long> pending = new ArrayDeque<>();
-        pending.push(rootId);
-        while (!pending.isEmpty()) {
-            Long currentId = pending.pop();
-            if (!subtree.add(currentId)) {
-                continue;
-            }
-            all.stream()
-                    .filter(c -> c.getParentCategory() != null
-                            && currentId.equals(c.getParentCategory().getId()))
-                    .forEach(c -> pending.push(c.getId()));
-        }
-        return subtree;
-    }
-
     // ------------------------------------------------------------------
 
     private Sort resolveSort(String sort) {
@@ -332,12 +312,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private String slugify(String input) {
-        String normalized = Normalizer.normalize(input.trim(), Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "");
-        String slug = normalized.toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("(^-+|-+$)", "");
-        return slug.isEmpty() ? "product" : slug;
+        return SlugUtils.slugify(input, "product");
     }
 
     private String normalizeSku(String sku) {

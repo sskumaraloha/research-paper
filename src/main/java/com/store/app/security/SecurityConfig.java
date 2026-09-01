@@ -4,6 +4,7 @@ import com.store.app.security.jwt.JwtAccessDeniedHandler;
 import com.store.app.security.jwt.JwtAuthenticationEntryPoint;
 import com.store.app.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -83,6 +84,9 @@ public class SecurityConfig {
                                 "/verify-otp", "/forgot-password", "/verify-reset-otp",
                                 "/reset-password", "/error").permitAll()
                         .requestMatchers("/products", "/products/**").permitAll()
+                        // OpenAPI docs (disabled entirely in the prod profile)
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")
@@ -135,5 +139,19 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * The JWT filter is a component so it can be injected into the API
+     * chain; this stops Spring Boot from ALSO auto-registering it as a
+     * plain servlet filter running on every request (pages included).
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
+            JwtAuthenticationFilter filter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 }

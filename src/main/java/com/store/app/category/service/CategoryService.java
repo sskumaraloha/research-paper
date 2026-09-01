@@ -56,6 +56,12 @@ public interface CategoryService {
     List<CategoryOptionResponse> getActiveCategoryOptions();
 
     /**
+     * Ids of a category plus all of its descendants (used by the
+     * storefront to filter products by a whole category subtree).
+     */
+    java.util.Set<Long> getSubtreeIds(Long categoryId);
+
+    /**
      * Public lookup of one active category (with its active subtree).
      *
      * @throws com.store.app.exception.ResourceNotFoundException

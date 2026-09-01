@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Login | Store Management System</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <span class="fs-1" aria-hidden="true">&#128722;</span>
+                            <h1 class="h3 fw-bold mt-2">Welcome back</h1>
+                            <p class="text-muted mb-0">Log in with your phone number</p>
+                        </div>
+
+                        <!-- Post-verification message -->
+                        <div th:if="${loginMessage}" class="alert alert-success" role="alert"
+                             th:text="${loginMessage}">Verified.</div>
+
+                        <!-- Logout confirmation -->
+                        <div th:if="${param.logout}" class="alert alert-info" role="alert">
+                            You have been logged out successfully.
+                        </div>
+
+                        <!-- Login failures (error code set by LoginFailureHandler) -->
+                        <div th:if="${param.error != null and param.error[0] == 'unverified'}"
+                             class="alert alert-warning" role="alert">
+                            Your phone number is not verified yet.
+                            <a th:href="@{/verify-otp}" class="alert-link">Verify it now</a>
+                            and then log in.
+                        </div>
+                        <div th:if="${param.error != null and param.error[0] == 'disabled'}"
+                             class="alert alert-danger" role="alert">
+                            This account is disabled. Please contact support.
+                        </div>
+                        <div th:if="${param.error != null and param.error[0] != 'unverified'
+                                      and param.error[0] != 'disabled'}"
+                             class="alert alert-danger" role="alert">
+                            Invalid phone number or password.
+                        </div>
+
+                        <form th:action="@{/login}" method="post" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone number</label>
+                                <input type="tel" id="phoneNumber" name="phoneNumber"
+                                       class="form-control" placeholder="10-digit mobile number"
+                                       required pattern="[0-9]{10}" inputmode="numeric"
+                                       maxlength="10" autofocus>
+                                <div class="invalid-feedback">Please enter exactly 10 digits.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" name="password"
+                                       class="form-control" required
+                                       autocomplete="current-password">
+                                <div class="invalid-feedback">Please enter your password.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-dark btn-lg">Log in</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <p class="text-center text-muted small mt-3">
+                    New here? <a th:href="@{/register}">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

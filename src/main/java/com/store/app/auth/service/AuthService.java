@@ -1,5 +1,7 @@
 package com.store.app.auth.service;
 
+import com.store.app.auth.dto.LoginRequest;
+import com.store.app.auth.dto.LoginResponse;
 import com.store.app.auth.dto.RegistrationRequest;
 import com.store.app.auth.dto.RegistrationResponse;
 
@@ -18,4 +20,14 @@ public interface AuthService {
      *         if the email or phone number is already registered
      */
     RegistrationResponse registerCustomer(RegistrationRequest request);
+
+    /**
+     * Authenticates a user by phone number and password and issues a
+     * JWT access token for the REST API.
+     *
+     * @throws com.store.app.exception.AuthenticationFailedException
+     *         if the credentials are wrong, the account is disabled,
+     *         or a customer's phone is not verified
+     */
+    LoginResponse login(LoginRequest request);
 }

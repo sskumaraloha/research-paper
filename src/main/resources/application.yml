@@ -21,6 +21,11 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
 
+# JWT settings for REST API authentication (secret is profile-specific)
+app:
+  jwt:
+    expiration-minutes: 60
+
 # OTP settings (delivery provider and limits)
 otp:
   provider: dummy          # dummy = log to console; e.g. twilio once integrated

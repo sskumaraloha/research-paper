@@ -69,6 +69,11 @@ public class AuthPageController {
         return "redirect:/verify-otp";
     }
 
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "auth/login";
+    }
+
     @GetMapping("/verify-otp")
     public String showOtpVerificationForm(
             @RequestParam(name = "phone", required = false) String phone, Model model) {
@@ -98,8 +103,8 @@ public class AuthPageController {
             return VERIFY_OTP_VIEW;
         }
 
-        redirectAttributes.addFlashAttribute("verificationSuccess",
-                "Your phone number has been verified successfully.");
-        return "redirect:/verify-otp";
+        redirectAttributes.addFlashAttribute("loginMessage",
+                "Your phone number has been verified successfully. You can now log in.");
+        return "redirect:/login";
     }
 }

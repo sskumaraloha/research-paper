@@ -1,5 +1,7 @@
 package com.store.app.auth.controller;
 
+import com.store.app.auth.dto.LoginRequest;
+import com.store.app.auth.dto.LoginResponse;
 import com.store.app.auth.dto.OtpResponse;
 import com.store.app.auth.dto.RegistrationRequest;
 import com.store.app.auth.dto.RegistrationResponse;
@@ -32,6 +34,11 @@ public class AuthController {
             @Valid @RequestBody RegistrationRequest request) {
         RegistrationResponse response = authService.registerCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/send-otp")

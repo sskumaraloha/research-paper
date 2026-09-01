@@ -10,6 +10,7 @@ import com.store.app.category.service.CategoryService;
 import com.store.app.exception.InvalidCategoryHierarchyException;
 import com.store.app.exception.OperationNotAllowedException;
 import com.store.app.exception.ResourceNotFoundException;
+import com.store.app.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import java.util.Set;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
 
     @Override
@@ -75,6 +77,11 @@ public class CategoryServiceImpl implements CategoryService {
             throw new OperationNotAllowedException(
                     "Cannot delete category \"" + category.getName()
                             + "\" while it has subcategories. Delete or move them first.");
+        }
+        if (productRepository.existsByCategoryId(id)) {
+            throw new OperationNotAllowedException(
+                    "Cannot delete category \"" + category.getName()
+                            + "\" while products are assigned to it. Move or delete them first.");
         }
         categoryRepository.delete(category);
     }

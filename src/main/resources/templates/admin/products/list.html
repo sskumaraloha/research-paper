@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Products | Admin</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Products</h1>
+                <p class="text-muted mb-0">Manage the product catalog</p>
+            </div>
+            <a th:href="@{/admin/products/create}" class="btn btn-dark">+ New product</a>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Done.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Search and sort -->
+        <form th:action="@{/admin/products}" method="get" class="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-5">
+                <input type="text" name="search" class="form-control" th:value="${search}"
+                       placeholder="Search by name, SKU, or brand">
+            </div>
+            <div class="col-8 col-md-4 col-lg-3">
+                <select name="sort" class="form-select">
+                    <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+                    <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: low to high</option>
+                    <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: high to low</option>
+                </select>
+            </div>
+            <div class="col-4 col-md-2">
+                <button type="submit" class="btn btn-outline-dark w-100">Apply</button>
+            </div>
+        </form>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 64px;"></th>
+                            <th scope="col">Name</th>
+                            <th scope="col">SKU</th>
+                            <th scope="col">Brand</th>
+                            <th scope="col">Category</th>
+                            <th scope="col" class="text-end">Price</th>
+                            <th scope="col" class="text-end">Stock</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(products.content)}">
+                            <td colspan="9" class="text-center text-muted py-4">
+                                No products found.
+                            </td>
+                        </tr>
+                        <tr th:each="product : ${products.content}">
+                            <td>
+                                <img th:if="${not #lists.isEmpty(product.images)}"
+                                     th:src="@{${product.images[0].imageUrl}}"
+                                     alt="" class="rounded" width="48" height="48"
+                                     style="object-fit: cover;">
+                                <span th:if="${#lists.isEmpty(product.images)}"
+                                      class="text-muted fs-4" aria-hidden="true">&#128247;</span>
+                            </td>
+                            <td class="fw-semibold" th:text="${product.productName}">Shirt</td>
+                            <td><code th:text="${product.sku}">SKU-1</code></td>
+                            <td th:text="${product.brand} ?: '—'">—</td>
+                            <td th:text="${product.categoryName}">Shirts</td>
+                            <td class="text-end">
+                                <span th:if="${product.discountPrice != null}">
+                                    <s class="text-muted small"
+                                       th:text="${#numbers.formatDecimal(product.price, 1, 2)}">100.00</s>
+                                    <span class="fw-semibold"
+                                          th:text="${#numbers.formatDecimal(product.discountPrice, 1, 2)}">80.00</span>
+                                </span>
+                                <span th:if="${product.discountPrice == null}" class="fw-semibold"
+                                      th:text="${#numbers.formatDecimal(product.price, 1, 2)}">100.00</span>
+                            </td>
+                            <td class="text-end">
+                                <span th:text="${product.stockQuantity}"
+                                      th:classappend="${product.stockQuantity <= product.minimumStockLevel} ? 'badge text-bg-warning' : ''">
+                                    12
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${product.active}" class="badge text-bg-success">Active</span>
+                                <span th:unless="${product.active}" class="badge text-bg-secondary">Inactive</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a th:href="@{/admin/products/{id}/edit(id=${product.id})}"
+                                       class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <form th:action="@{/admin/products/{id}/toggle(id=${product.id})}"
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                th:text="${product.active} ? 'Deactivate' : 'Activate'">
+                                            Deactivate
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/products/{id}/delete(id=${product.id})}"
+                                          method="post" class="d-inline"
+                                          th:attr="onsubmit=|return confirm('Delete product &quot;${product.productName}&quot;? This cannot be undone.');|">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${products.totalPages > 1}" aria-label="Product pages" class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/products(page=${products.page - 1}, search=${search}, sort=${sort})}">
+                        Previous
+                    </a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                    th:classappend="${i == products.page} ? 'active'">
+                    <a class="page-link" th:text="${i + 1}"
+                       th:href="@{/admin/products(page=${i}, search=${search}, sort=${sort})}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/products(page=${products.page + 1}, search=${search}, sort=${sort})}">
+                        Next
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

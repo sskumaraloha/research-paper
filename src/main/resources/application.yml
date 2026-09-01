@@ -26,6 +26,13 @@ app:
   jwt:
     expiration-minutes: 60
 
+  # File storage for uploads (local disk now; s3 can be added later)
+  storage:
+    provider: local
+    local-base-dir: uploads
+    url-prefix: /uploads
+    max-file-size-mb: 2
+
 # OTP settings (delivery provider and limits)
 otp:
   provider: dummy          # dummy = log to console; e.g. twilio once integrated

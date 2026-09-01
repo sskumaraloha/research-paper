@@ -82,7 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/health", "/login", "/register",
                                 "/verify-otp", "/forgot-password", "/verify-reset-otp",
                                 "/reset-password", "/error").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())

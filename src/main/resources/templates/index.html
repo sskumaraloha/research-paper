@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Home | Store Management System</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1">
+    <section class="hero-section text-center py-5">
+        <div class="container py-5">
+            <span class="display-1" aria-hidden="true">&#128722;</span>
+            <h1 class="display-5 fw-bold mt-3" th:text="${applicationName}">Store Management System</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 640px;">
+                E-Commerce and Inventory Management for your neighborhood general store &mdash;
+                groceries, clothing, household items, personal care, and daily essentials.
+            </p>
+            <div class="d-inline-flex align-items-center gap-2 mt-3 px-4 py-2 rounded-pill bg-success-subtle border border-success">
+                <span class="status-dot bg-success rounded-circle" aria-hidden="true"></span>
+                <span class="fw-semibold text-success">Application is up and running</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <span class="fs-1" aria-hidden="true">&#127822;</span>
+                            <h5 class="card-title mt-2">Wide Product Range</h5>
+                            <p class="card-text text-muted">
+                                Grocery and food, men's, women's and children's clothing,
+                                household items, and personal care products.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <span class="fs-1" aria-hidden="true">&#128230;</span>
+                            <h5 class="card-title mt-2">Inventory Management</h5>
+                            <p class="card-text text-muted">
+                                Track stock levels, movements, and low-stock alerts
+                                across every category in the store.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <span class="fs-1" aria-hidden="true">&#128179;</span>
+                            <h5 class="card-title mt-2">Online Ordering</h5>
+                            <p class="card-text text-muted">
+                                Cart, wishlist, checkout, payments, and order tracking
+                                for a complete shopping experience.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

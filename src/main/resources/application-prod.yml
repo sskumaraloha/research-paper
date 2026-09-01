@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  thymeleaf:
+    cache: true
+
+server:
+  error:
+    include-message: never
+
+logging:
+  level:
+    root: WARN
+    com.store.app: INFO

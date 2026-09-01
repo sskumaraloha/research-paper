@@ -1,0 +1,22 @@
+/* ============================================================
+   Store Management System - global styles
+   ============================================================ */
+
+.hero-section {
+    background: linear-gradient(180deg, #ffffff 0%, #f4f6f8 100%);
+}
+
+.status-dot {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+}
+
+.card {
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}

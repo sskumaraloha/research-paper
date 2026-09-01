@@ -24,7 +24,6 @@ import com.store.app.order.mapper.OrderMapper;
 import com.store.app.order.repository.OrderItemRepository;
 import com.store.app.order.repository.OrderRepository;
 import com.store.app.order.service.OrderService;
-import com.store.app.payment.entity.Payment;
 import com.store.app.payment.service.PaymentService;
 import com.store.app.payment.service.PaymentServiceRegistry;
 import com.store.app.product.entity.Product;
@@ -58,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
     private final AddressService addressService;
     private final InventoryService inventoryService;
     private final PaymentServiceRegistry paymentServiceRegistry;
+    private final OrderCancellationProcessor cancellationProcessor;
     private final OrderMapper orderMapper;
 
     @Override
@@ -169,25 +169,7 @@ public class OrderServiceImpl implements OrderService {
                             + order.getStatus() + ")");
         }
 
-        // Restock every line that still maps to a catalog product.
-        for (OrderItem item : order.getItems()) {
-            if (item.getProduct() == null) {
-                continue;
-            }
-            StockUpdateRequest restock = new StockUpdateRequest();
-            restock.setProductId(item.getProduct().getId());
-            restock.setQuantity(item.getQuantity());
-            restock.setTransactionType(InventoryTransactionType.RETURN);
-            restock.setReference(order.getOrderNumber());
-            restock.setRemarks("Order cancelled");
-            inventoryService.increaseStock(restock);
-        }
-
-        order.setStatus(OrderStatus.CANCELLED);
-        Payment payment = order.getPayment();
-        paymentServiceRegistry.getService(payment.getPaymentMethod())
-                .cancelPayment(payment);
-
+        cancellationProcessor.cancel(order, "Order cancelled by customer");
         return orderMapper.toResponse(orderRepository.save(order));
     }
 

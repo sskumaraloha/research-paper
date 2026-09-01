@@ -20,6 +20,9 @@
            th:classappend="${active == 'dashboard'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
            th:href="@{/admin/dashboard}">&#128200; Dashboard</a>
         <a class="nav-link text-white px-3 py-2"
+           th:classappend="${active == 'orders'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
+           th:href="@{/admin/orders}">&#128666; Orders</a>
+        <a class="nav-link text-white px-3 py-2"
            th:classappend="${active == 'categories'} ? 'bg-secondary bg-opacity-50 fw-semibold'"
            th:href="@{/admin/categories}">&#128193; Categories</a>
         <a class="nav-link text-white px-3 py-2"

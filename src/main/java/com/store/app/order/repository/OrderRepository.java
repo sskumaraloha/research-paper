@@ -27,6 +27,32 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     boolean existsByOrderNumber(String orderNumber);
 
+    /** Admin lookup with everything the detail page needs. */
+    @EntityGraph(attributePaths = {"items", "payment", "user"})
+    Optional<Order> findOneById(Long id);
+
+    /**
+     * Admin listing: optional text search (order number, customer name,
+     * phone), status filter, and creation date range.
+     */
+    @EntityGraph(attributePaths = {"items", "payment", "user"})
+    @Query("""
+            select o from Order o join o.user u
+            where (:search is null or :search = ''
+                or lower(o.orderNumber) like lower(concat('%', :search, '%'))
+                or lower(u.firstName) like lower(concat('%', :search, '%'))
+                or lower(u.lastName) like lower(concat('%', :search, '%'))
+                or u.phoneNumber like concat('%', :search, '%'))
+              and (:status is null or o.status = :status)
+              and (:fromDate is null or o.createdAt >= :fromDate)
+              and (:toDate is null or o.createdAt < :toDate)
+            """)
+    Page<Order> adminSearch(@Param("search") String search,
+                            @Param("status") OrderStatus status,
+                            @Param("fromDate") LocalDateTime fromDate,
+                            @Param("toDate") LocalDateTime toDate,
+                            Pageable pageable);
+
     /** Booked revenue: all orders except those in the excluded status. */
     @Query("select coalesce(sum(o.totalAmount), 0) from Order o where o.status <> :excluded")
     BigDecimal sumTotalAmountByStatusNot(@Param("excluded") OrderStatus excluded);

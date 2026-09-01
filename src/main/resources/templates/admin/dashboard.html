@@ -110,7 +110,12 @@
                                             </td>
                                         </tr>
                                         <tr th:each="order : ${recentOrders}">
-                                            <td><code th:text="${order.orderNumber}">ORD</code></td>
+                                            <td>
+                                                <a th:href="@{/admin/orders/{id}(id=${order.id})}"
+                                                   class="text-decoration-none">
+                                                    <code th:text="${order.orderNumber}">ORD</code>
+                                                </a>
+                                            </td>
                                             <td th:text="${order.customerName}">Customer</td>
                                             <td class="text-muted small"
                                                 th:text="${#temporals.format(order.createdAt, 'dd MMM HH:mm')}">date</td>

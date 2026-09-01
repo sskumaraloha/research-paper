@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Product Form | Admin</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8">
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/products}">Products</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:text="${formTitle}">Create product</li>
+                    </ol>
+                </nav>
+
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}">Done.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}">Error.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h1 class="h4 fw-bold mb-4" th:text="${formTitle}">Create product</h1>
+
+
+                        <form th:action="@{${formAction}}" th:object="${productRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <label for="productName" class="form-label">Product name</label>
+                                    <input type="text" id="productName" th:field="*{productName}"
+                                           class="form-control" required minlength="2" maxlength="150"
+                                           th:classappend="${#fields.hasErrors('productName')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('productName')}"
+                                         th:errors="*{productName}">Name error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('productName')}">
+                                        Please enter a product name (2-150 characters).
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <label for="sku" class="form-label">SKU</label>
+                                    <input type="text" id="sku" th:field="*{sku}"
+                                           class="form-control" required minlength="2" maxlength="50"
+                                           th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'"
+                                           placeholder="e.g. GRO-RICE-5KG">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('sku')}"
+                                         th:errors="*{sku}">SKU error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('sku')}">
+                                        Please enter a unique SKU.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label for="categoryId" class="form-label">Category</label>
+                                    <select id="categoryId" th:field="*{categoryId}" class="form-select" required
+                                            th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                                        <option value="">Select a category</option>
+                                        <option th:each="option : ${categoryOptions}"
+                                                th:value="${option.id}"
+                                                th:text="${option.parentName != null}
+                                                         ? ${option.name + ' (under ' + option.parentName + ')'}
+                                                         : ${option.name}">Category</option>
+                                    </select>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('categoryId')}"
+                                         th:errors="*{categoryId}">Category error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('categoryId')}">
+                                        Please choose a category.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label for="brand" class="form-label">
+                                        Brand <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <input type="text" id="brand" th:field="*{brand}"
+                                           class="form-control" maxlength="100"
+                                           th:classappend="${#fields.hasErrors('brand')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('brand')}"
+                                         th:errors="*{brand}">Brand error</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description" class="form-label">
+                                        Description <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <textarea id="description" th:field="*{description}"
+                                              class="form-control" rows="4" maxlength="2000"
+                                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                                         th:errors="*{description}">Description error</div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="number" id="price" th:field="*{price}"
+                                           class="form-control" required step="0.01" min="0.01"
+                                           th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}"
+                                         th:errors="*{price}">Price error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('price')}">
+                                        Please enter a price greater than zero.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <label for="discountPrice" class="form-label">
+                                        Discount price <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <input type="number" id="discountPrice" th:field="*{discountPrice}"
+                                           class="form-control" step="0.01" min="0.01"
+                                           th:classappend="${#fields.hasErrors('discountPrice')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('discountPrice')}"
+                                         th:errors="*{discountPrice}">Discount error</div>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <label for="costPrice" class="form-label">
+                                        Cost price <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <input type="number" id="costPrice" th:field="*{costPrice}"
+                                           class="form-control" step="0.01" min="0">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('costPrice')}"
+                                         th:errors="*{costPrice}">Cost error</div>
+                                </div>
+
+                                <div class="col-6 col-md-4">
+                                    <label for="stockQuantity" class="form-label">Stock quantity</label>
+                                    <input type="number" id="stockQuantity" th:field="*{stockQuantity}"
+                                           class="form-control" required min="0" step="1"
+                                           th:classappend="${#fields.hasErrors('stockQuantity')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('stockQuantity')}"
+                                         th:errors="*{stockQuantity}">Stock error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('stockQuantity')}">
+                                        Enter a non-negative quantity.
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-4">
+                                    <label for="minimumStockLevel" class="form-label">Minimum stock level</label>
+                                    <input type="number" id="minimumStockLevel" th:field="*{minimumStockLevel}"
+                                           class="form-control" required min="0" step="1"
+                                           th:classappend="${#fields.hasErrors('minimumStockLevel')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('minimumStockLevel')}"
+                                         th:errors="*{minimumStockLevel}">Minimum stock error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('minimumStockLevel')}">
+                                        Enter a non-negative level.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-4 d-flex align-items-end">
+                                    <div class="form-check form-switch mb-2">
+                                        <input type="checkbox" id="active" th:field="*{active}"
+                                               class="form-check-input" role="switch">
+                                        <label for="active" class="form-check-label">
+                                            Active (visible to customers)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 d-flex gap-2 mt-2">
+                                    <button type="submit" class="btn btn-dark">Save product</button>
+                                    <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Image management: only when editing an existing product -->
+                <div class="card shadow-sm border-0" th:if="${editingProduct != null}">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3">Images</h2>
+
+                        <p th:if="${#lists.isEmpty(editingProduct.images)}" class="text-muted">
+                            No images yet. The first image becomes the product thumbnail.
+                        </p>
+
+                        <div class="row g-3 mb-3" th:unless="${#lists.isEmpty(editingProduct.images)}">
+                            <div class="col-6 col-md-3" th:each="image : ${editingProduct.images}">
+                                <div class="border rounded p-2 text-center">
+                                    <img th:src="@{${image.imageUrl}}" alt="Product image"
+                                         class="img-fluid rounded mb-2"
+                                         style="height: 120px; object-fit: cover;">
+                                    <form th:action="@{/admin/products/{id}/images/{imageId}/delete(id=${editingProduct.id}, imageId=${image.id})}"
+                                          method="post"
+                                          onsubmit="return confirm('Remove this image?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/admin/products/{id}/images(id=${editingProduct.id})}"
+                              method="post" enctype="multipart/form-data" class="row g-2">
+                            <div class="col-12 col-md-8">
+                                <input type="file" name="file" class="form-control"
+                                       accept="image/jpeg,image/png,image/webp,image/gif" required>
+                                <div class="form-text">JPEG, PNG, WebP, or GIF - up to 2 MB.</div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <button type="submit" class="btn btn-outline-dark w-100">Upload image</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Order Details | Admin</title>
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+    <div class="row min-vh-100">
+
+        <aside th:replace="~{fragments/admin-layout :: sidebar('orders')}"></aside>
+
+        <div class="col-12 col-lg-10 p-0 d-flex flex-column">
+
+            <header th:replace="~{fragments/admin-layout :: topbar('Order details')}"></header>
+
+            <main class="p-4 flex-grow-1">
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/orders}">Orders</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:text="${detail.order.orderNumber}">ORD</li>
+                    </ol>
+                </nav>
+
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}">Done.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}">Error.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="h4 fw-bold mb-1">
+                            Order <code th:text="${detail.order.orderNumber}">ORD</code>
+                        </h2>
+                        <p class="text-muted small mb-0"
+                           th:text="'Placed on ' + ${#temporals.format(detail.order.createdAt, 'dd MMM yyyy HH:mm')}">
+                            date</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge fs-6"
+                              th:classappend="${detail.order.status.name() == 'DELIVERED'} ? 'text-bg-success'
+                                              : (${detail.order.status.name() == 'CANCELLED'} ? 'text-bg-secondary' : 'text-bg-warning')"
+                              th:text="${detail.order.status}">PENDING</span>
+
+                        <!-- Status update: only legal next steps are offered -->
+                        <form th:if="${!#lists.isEmpty(detail.allowedNextStatuses)}"
+                              th:action="@{/admin/orders/{id}/status(id=${detail.order.id})}"
+                              th:object="${updateOrderStatusRequest}"
+                              method="post" class="d-flex gap-1">
+                            <select th:field="*{status}" class="form-select form-select-sm"
+                                    required aria-label="New status">
+                                <option value="">Move to...</option>
+                                <option th:each="next : ${detail.allowedNextStatuses}"
+                                        th:value="${next}" th:text="${next}">CONFIRMED</option>
+                            </select>
+                            <button type="submit" class="btn btn-dark btn-sm"
+                                    onclick="return confirm('Change the order status?');">
+                                Update
+                            </button>
+                        </form>
+                        <span th:if="${#lists.isEmpty(detail.allowedNextStatuses)}"
+                              class="text-muted small">Final status</span>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-xl-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white fw-bold">Items</div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Item</th>
+                                            <th scope="col">SKU</th>
+                                            <th scope="col" class="text-end">Price</th>
+                                            <th scope="col" class="text-end">Qty</th>
+                                            <th scope="col" class="text-end">Total</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="item : ${detail.order.items}">
+                                            <td class="fw-semibold" th:text="${item.productName}">Product</td>
+                                            <td><code class="small" th:text="${item.sku}">SKU</code></td>
+                                            <td class="text-end"
+                                                th:text="'₹' + ${#numbers.formatDecimal(item.priceAtPurchase, 1, 2)}">₹0</td>
+                                            <td class="text-end" th:text="${item.quantity}">1</td>
+                                            <td class="text-end fw-semibold"
+                                                th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 2)}">₹0</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="d-flex justify-content-end gap-4 small">
+                                    <span>Subtotal:
+                                        <strong th:text="'₹' + ${#numbers.formatDecimal(detail.order.subtotal, 1, 2)}">₹0</strong>
+                                    </span>
+                                    <span class="text-success" th:if="${detail.order.discount.signum() > 0}">
+                                        Discount:
+                                        <strong th:text="'-₹' + ${#numbers.formatDecimal(detail.order.discount, 1, 2)}">₹0</strong>
+                                    </span>
+                                    <span>Total:
+                                        <strong class="fs-6"
+                                                th:text="'₹' + ${#numbers.formatDecimal(detail.order.totalAmount, 1, 2)}">₹0</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white fw-bold">Customer</div>
+                            <div class="card-body small">
+                                <strong th:text="${detail.customerName}">Name</strong><br>
+                                <span th:text="${detail.customerPhone}">phone</span><br>
+                                <span class="text-muted" th:text="${detail.customerEmail}">email</span>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white fw-bold">Payment</div>
+                            <div class="card-body small">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Method</span>
+                                    <span th:text="${detail.order.paymentMethod.name() == 'CASH_ON_DELIVERY'}
+                                                   ? 'Cash on delivery' : 'Online'">COD</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Status</span>
+                                    <span class="badge"
+                                          th:classappend="${detail.order.paymentStatus.name() == 'PAID'} ? 'text-bg-success'
+                                                          : (${detail.order.paymentStatus.name() == 'PENDING'} ? 'text-bg-warning' : 'text-bg-secondary')"
+                                          th:text="${detail.order.paymentStatus}">PENDING</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white fw-bold">Delivery address</div>
+                            <div class="card-body small">
+                                <strong th:text="${detail.order.shippingAddress.fullName}">Name</strong><br>
+                                <span th:text="${detail.order.shippingAddress.addressLine1}">Line 1</span><br>
+                                <th:block th:if="${detail.order.shippingAddress.addressLine2 != null}">
+                                    <span th:text="${detail.order.shippingAddress.addressLine2}">Line 2</span><br>
+                                </th:block>
+                                <span th:text="${detail.order.shippingAddress.city + ', '
+                                                 + detail.order.shippingAddress.state + ' '
+                                                 + detail.order.shippingAddress.pincode}">City</span><br>
+                                <span th:text="${detail.order.shippingAddress.country}">India</span><br>
+                                Phone: <span th:text="${detail.order.shippingAddress.phoneNumber}">phone</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

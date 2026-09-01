@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Shop | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h1 class="h3 fw-bold mb-0">Shop</h1>
+            <span class="text-muted small"
+                  th:text="${products.totalElements} + ' product(s) found'">0 products</span>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Filters sidebar -->
+            <aside class="col-12 col-lg-3">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h2 class="h6 fw-bold text-uppercase text-muted mb-3">Filters</h2>
+                        <form th:action="@{/products}" method="get">
+                            <div class="mb-3">
+                                <label for="filterSearch" class="form-label small fw-semibold">Search</label>
+                                <input type="search" id="filterSearch" name="search"
+                                       class="form-control form-control-sm"
+                                       th:value="${search}" placeholder="Product or brand">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="filterCategory" class="form-label small fw-semibold">Category</label>
+                                <select id="filterCategory" name="category"
+                                        class="form-select form-select-sm">
+                                    <option value="">All categories</option>
+                                    <option th:each="option : ${categoryOptions}"
+                                            th:value="${option.slug}"
+                                            th:text="${option.label}"
+                                            th:selected="${option.slug == category}">Grocery</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" th:if="${!#lists.isEmpty(brandOptions)}">
+                                <label for="filterBrand" class="form-label small fw-semibold">Brand</label>
+                                <select id="filterBrand" name="brand"
+                                        class="form-select form-select-sm">
+                                    <option value="">All brands</option>
+                                    <option th:each="b : ${brandOptions}" th:value="${b}"
+                                            th:text="${b}" th:selected="${b == brand}">Brand</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold" for="minPrice">Price range</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" id="minPrice" name="minPrice"
+                                           class="form-control" placeholder="Min"
+                                           min="0" step="0.01" th:value="${minPrice}">
+                                    <span class="input-group-text">-</span>
+                                    <input type="number" id="maxPrice" name="maxPrice"
+                                           class="form-control" placeholder="Max"
+                                           min="0" step="0.01" th:value="${maxPrice}"
+                                           aria-label="Maximum price">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="filterSort" class="form-label small fw-semibold">Sort by</label>
+                                <select id="filterSort" name="sort" class="form-select form-select-sm">
+                                    <option value="newest" th:selected="${sort == 'newest'}">Newest first</option>
+                                    <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: low to high</option>
+                                    <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: high to low</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-dark btn-sm">Apply filters</button>
+                                <a th:href="@{/products}" class="btn btn-outline-secondary btn-sm">Clear all</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product grid -->
+            <div class="col-12 col-lg-9">
+                <div th:if="${#lists.isEmpty(products.content)}"
+                     class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <span class="display-4" aria-hidden="true">&#128269;</span>
+                        <h2 class="h5 fw-bold mt-3">No products match your filters</h2>
+                        <p class="text-muted mb-3">Try a different search or clear the filters.</p>
+                        <a th:href="@{/products}" class="btn btn-outline-dark btn-sm">Clear filters</a>
+                    </div>
+                </div>
+
+                <div class="row g-3" th:unless="${#lists.isEmpty(products.content)}">
+                    <div class="col-6 col-md-4" th:each="product : ${products.content}">
+                        <div th:replace="~{fragments/product-card :: card(${product})}"></div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${products.totalPages > 1}" aria-label="Product pages" class="mt-4">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${products.first} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/products(page=${products.page - 1}, search=${search},
+                                          category=${category}, brand=${brand},
+                                          minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">
+                                Previous
+                            </a>
+                        </li>
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                            th:classappend="${i == products.page} ? 'active'">
+                            <a class="page-link" th:text="${i + 1}"
+                               th:href="@{/products(page=${i}, search=${search},
+                                          category=${category}, brand=${brand},
+                                          minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${products.last} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/products(page=${products.page + 1}, search=${search},
+                                          category=${category}, brand=${brand},
+                                          minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

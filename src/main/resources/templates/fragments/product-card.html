@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ============================================================
+     Reusable product card.
+     Usage: <div th:replace="~{fragments/product-card :: card(${product})}">
+     ============================================================ -->
+<div th:fragment="card(product)" class="card h-100 shadow-sm border-0 product-card">
+    <a th:href="@{/products/{slug}(slug=${product.slug})}"
+       class="text-decoration-none position-relative">
+        <span th:if="${product.discountPrice != null}"
+              class="badge text-bg-danger position-absolute top-0 start-0 m-2">Sale</span>
+        <span th:unless="${product.inStock}"
+              class="badge text-bg-secondary position-absolute top-0 end-0 m-2">Out of stock</span>
+        <img th:if="${product.imageUrl != null}" th:src="@{${product.imageUrl}}"
+             class="card-img-top" alt="" style="height: 180px; object-fit: cover;">
+        <div th:if="${product.imageUrl == null}"
+             class="card-img-top d-flex align-items-center justify-content-center bg-light"
+             style="height: 180px;">
+            <span class="fs-1" aria-hidden="true">&#128230;</span>
+        </div>
+    </a>
+    <div class="card-body d-flex flex-column">
+        <p class="text-muted small mb-1" th:text="${product.brand} ?: ''">Brand</p>
+        <h3 class="h6 card-title mb-2">
+            <a th:href="@{/products/{slug}(slug=${product.slug})}"
+               class="text-decoration-none text-dark stretched-link"
+               th:text="${product.productName}">Product name</a>
+        </h3>
+        <div class="mt-auto">
+            <span th:if="${product.discountPrice != null}">
+                <span class="fw-bold" th:text="'₹' + ${#numbers.formatDecimal(product.discountPrice, 1, 2)}">₹80.00</span>
+                <s class="text-muted small" th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 2)}">₹100.00</s>
+            </span>
+            <span th:if="${product.discountPrice == null}" class="fw-bold"
+                  th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 2)}">₹100.00</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

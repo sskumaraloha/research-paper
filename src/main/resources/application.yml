@@ -21,6 +21,27 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
 
+# JWT settings for REST API authentication (secret is profile-specific)
+app:
+  jwt:
+    expiration-minutes: 60
+
+  # File storage for uploads (local disk now; s3 can be added later)
+  storage:
+    provider: local
+    local-base-dir: uploads
+    url-prefix: /uploads
+    max-file-size-mb: 2
+
+# OTP settings (delivery provider and limits)
+otp:
+  provider: dummy          # dummy = log to console; e.g. twilio once integrated
+  expiry-minutes: 5
+  max-attempts: 5
+  resend-cooldown-seconds: 60
+  max-requests-per-hour: 5
+  reset-token-expiry-minutes: 10
+
 server:
   port: 8080
   error:

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Verify Phone | Store Management System</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <span class="fs-1" aria-hidden="true">&#128241;</span>
+                            <h1 class="h3 fw-bold mt-2">Verify your phone</h1>
+                            <p class="text-muted mb-0">
+                                Request an OTP and enter the 6-digit code we send you.
+                            </p>
+                        </div>
+
+                        <!-- Flash messages -->
+                        <div th:if="${registrationSuccess}" class="alert alert-success" role="alert"
+                             th:text="${registrationSuccess}">Registration successful.</div>
+                        <div th:if="${verificationSuccess}" class="alert alert-success" role="alert"
+                             th:text="${verificationSuccess}">Verified.</div>
+
+                        <!-- Business errors (invalid/expired OTP, rate limits) -->
+
+                        <!-- Feedback from the resend button (filled by JavaScript) -->
+                        <div id="resendFeedback" class="alert d-none" role="alert"></div>
+
+                        <form th:action="@{/verify-otp}" th:object="${verifyOtpRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                        <div th:if="${#fields.hasGlobalErrors()}"
+                             class="alert alert-danger" role="alert">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                               th:text="${err}">Error</p>
+                        </div>
+
+
+                            <input type="hidden" th:field="*{purpose}">
+
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone number</label>
+                                <input type="tel" id="phoneNumber" th:field="*{phoneNumber}"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'"
+                                       placeholder="10-digit mobile number" required
+                                       pattern="[0-9]{10}" inputmode="numeric" maxlength="10">
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('phoneNumber')}"
+                                     th:errors="*{phoneNumber}">Phone error</div>
+                                <div class="invalid-feedback"
+                                     th:unless="${#fields.hasErrors('phoneNumber')}">
+                                    Please enter exactly 10 digits.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="otpCode" class="form-label">OTP code</label>
+                                <input type="text" id="otpCode" th:field="*{otpCode}"
+                                       class="form-control form-control-lg text-center"
+                                       th:classappend="${#fields.hasErrors('otpCode')} ? 'is-invalid'"
+                                       placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required
+                                       pattern="[0-9]{6}" inputmode="numeric" maxlength="6"
+                                       autocomplete="one-time-code">
+                                <div class="invalid-feedback"
+                                     th:if="${#fields.hasErrors('otpCode')}"
+                                     th:errors="*{otpCode}">OTP error</div>
+                                <div class="invalid-feedback"
+                                     th:unless="${#fields.hasErrors('otpCode')}">
+                                    The OTP is exactly 6 digits.
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-dark btn-lg">Verify</button>
+                                <button type="button" id="sendOtpButton" class="btn btn-outline-dark">
+                                    Send / Resend OTP
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <p class="text-center text-muted small mt-3">
+                    In development mode the OTP is printed in the application console.
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+    // Requests an OTP for the entered phone number via the JSON API and
+    // shows the outcome (including rate-limit messages) inline.
+    document.getElementById('sendOtpButton').addEventListener('click', function () {
+        var button = this;
+        var phone = document.getElementById('phoneNumber').value;
+        var purpose = document.getElementById('purpose').value;
+        var feedback = document.getElementById('resendFeedback');
+
+        var show = function (type, message) {
+            feedback.className = 'alert alert-' + type;
+            feedback.textContent = message;
+        };
+
+        if (!/^[0-9]{10}$/.test(phone)) {
+            show('danger', 'Enter a valid 10-digit phone number first.');
+            return;
+        }
+
+        button.disabled = true;
+        fetch('/api/auth/send-otp', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({phoneNumber: phone, purpose: purpose})
+        })
+            .then(function (response) {
+                return response.json().then(function (body) {
+                    show(response.ok ? 'success' : 'danger',
+                        body.message || 'Unable to send OTP.');
+                });
+            })
+            .catch(function () {
+                show('danger', 'Network error. Please try again.');
+            })
+            .finally(function () {
+                setTimeout(function () { button.disabled = false; }, 3000);
+            });
+    });
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- ============================================================
      Shared <head> fragment.
@@ -30,12 +31,73 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNavbar">
+            <form th:action="@{/products}" method="get"
+                  class="d-flex flex-grow-1 mx-lg-4 my-2 my-lg-0" role="search">
+                <div class="input-group">
+                    <input type="search" name="search" class="form-control"
+                           placeholder="Search products..."
+                           aria-label="Search products">
+                    <button type="submit" class="btn btn-warning" aria-label="Search">
+                        &#128269;
+                    </button>
+                </div>
+            </form>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/}">Home</a>
+                    <a class="nav-link" th:href="@{/products}">Shop</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/health}">Health</a>
+                <li class="nav-item dropdown"
+                    th:if="${navCategories != null and !#lists.isEmpty(navCategories)}">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li th:each="cat : ${navCategories}">
+                            <a class="dropdown-item"
+                               th:href="@{/products(category=${cat.slug})}"
+                               th:text="${cat.name}">Grocery</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/categories}">Categories</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/products}">Products</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/inventory}">Inventory</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/register}">Register</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/login}">Login</a>
+                </li>
+                <li class="nav-item dropdown" sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">My Account</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/customer/profile}">Profile</a></li>
+                        <li><a class="dropdown-item" th:href="@{/customer/orders}">My Orders</a></li>
+                        <li><a class="dropdown-item" th:href="@{/customer/wishlist}">Wishlist</a></li>
+                        <li><a class="dropdown-item" th:href="@{/customer/addresses}">Addresses</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/cart}">
+                        Cart
+                        <span th:if="${cartItemCount != null and cartItemCount > 0}"
+                              class="badge text-bg-warning ms-1" th:text="${cartItemCount}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <span class="nav-link text-secondary" sec:authentication="name">user</span>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link">Logout</button>
+                    </form>
                 </li>
             </ul>
         </div>

@@ -1,3 +1,9 @@
+# DEVELOPMENT-ONLY JWT signing key (base64, >= 256 bits).
+# Never reuse this value outside local development; prod reads JWT_SECRET.
+app:
+  jwt:
+    secret: c3RvcmUtbWFuYWdlbWVudC1zeXN0ZW0tZGV2LW9ubHktand0LXNlY3JldC1rZXktMDEyMzQ1Njc4OQ==
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/store_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC

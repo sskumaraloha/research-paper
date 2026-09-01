@@ -12,11 +12,17 @@
     height: 0.65rem;
 }
 
-.card {
+.product-card,
+.category-tile {
     transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.card:hover {
+.product-card:hover,
+.category-tile:hover {
     transform: translateY(-3px);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.product-thumb:hover {
+    outline: 2px solid #212529;
 }

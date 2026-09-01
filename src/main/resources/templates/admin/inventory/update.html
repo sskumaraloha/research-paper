@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Update Stock | Admin</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/inventory}">Inventory</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Update stock</li>
+                    </ol>
+                </nav>
+
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}">Done.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}">Error.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Product summary -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h1 class="h4 fw-bold mb-1" th:text="${inventory.productName}">Product</h1>
+                            <code th:text="${inventory.sku}">SKU</code>
+                        </div>
+                        <div class="text-end">
+                            <div class="fs-4 fw-bold" th:text="${inventory.currentStock}">10</div>
+                            <div class="text-muted small">
+                                current stock (min. <span th:text="${inventory.minimumStockLevel}">5</span>)
+                            </div>
+                            <span th:if="${inventory.status.name() == 'IN_STOCK'}"
+                                  class="badge text-bg-success">In stock</span>
+                            <span th:if="${inventory.status.name() == 'LOW_STOCK'}"
+                                  class="badge text-bg-warning">Low stock</span>
+                            <span th:if="${inventory.status.name() == 'OUT_OF_STOCK'}"
+                                  class="badge text-bg-danger">Out of stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Stock in -->
+                    <div class="col-12 col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <h2 class="h6 fw-bold text-success mb-3">&#8593; Stock in</h2>
+                                <form th:action="@{/admin/inventory/increase}"
+                                      th:object="${increaseRequest}" method="post">
+                                    <input type="hidden" th:field="*{productId}">
+                                    <div class="mb-2">
+                                        <label for="incQty" class="form-label small">Quantity</label>
+                                        <input type="number" id="incQty" th:field="*{quantity}"
+                                               class="form-control form-control-sm" required min="1" step="1">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="incType" class="form-label small">Reason</label>
+                                        <select id="incType" th:field="*{transactionType}"
+                                                class="form-select form-select-sm" required>
+                                            <option value="PURCHASE">Purchase (goods received)</option>
+                                            <option value="RETURN">Customer return</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="incRef" class="form-label small">Reference (optional)</label>
+                                        <input type="text" id="incRef" th:field="*{reference}"
+                                               class="form-control form-control-sm" maxlength="100"
+                                               placeholder="e.g. PO-1042">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="incRemarks" class="form-label small">Remarks (optional)</label>
+                                        <input type="text" id="incRemarks" th:field="*{remarks}"
+                                               class="form-control form-control-sm" maxlength="255">
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm w-100">Add stock</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock out -->
+                    <div class="col-12 col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <h2 class="h6 fw-bold text-danger mb-3">&#8595; Stock out</h2>
+                                <form th:action="@{/admin/inventory/decrease}"
+                                      th:object="${decreaseRequest}" method="post">
+                                    <input type="hidden" th:field="*{productId}">
+                                    <div class="mb-2">
+                                        <label for="decQty" class="form-label small">Quantity</label>
+                                        <input type="number" id="decQty" th:field="*{quantity}"
+                                               class="form-control form-control-sm" required min="1" step="1">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="decType" class="form-label small">Reason</label>
+                                        <select id="decType" th:field="*{transactionType}"
+                                                class="form-select form-select-sm" required>
+                                            <option value="SALE">Sale (offline/counter)</option>
+                                            <option value="DAMAGE">Damaged / expired</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="decRef" class="form-label small">Reference (optional)</label>
+                                        <input type="text" id="decRef" th:field="*{reference}"
+                                               class="form-control form-control-sm" maxlength="100"
+                                               placeholder="e.g. BILL-2210">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="decRemarks" class="form-label small">Remarks (optional)</label>
+                                        <input type="text" id="decRemarks" th:field="*{remarks}"
+                                               class="form-control form-control-sm" maxlength="255">
+                                    </div>
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">Remove stock</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adjust -->
+                    <div class="col-12 col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <h2 class="h6 fw-bold mb-3">&#9878; Adjust to count</h2>
+                                <form th:action="@{/admin/inventory/adjust}"
+                                      th:object="${adjustRequest}" method="post">
+                                    <input type="hidden" th:field="*{productId}">
+                                    <div class="mb-2">
+                                        <label for="adjStock" class="form-label small">Counted stock</label>
+                                        <input type="number" id="adjStock" th:field="*{newStock}"
+                                               class="form-control form-control-sm" required min="0" step="1">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="adjRef" class="form-label small">Reference (optional)</label>
+                                        <input type="text" id="adjRef" th:field="*{reference}"
+                                               class="form-control form-control-sm" maxlength="100"
+                                               placeholder="e.g. STOCKTAKE-SEP">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="adjRemarks" class="form-label small">Remarks (optional)</label>
+                                        <input type="text" id="adjRemarks" th:field="*{remarks}"
+                                               class="form-control form-control-sm" maxlength="255">
+                                    </div>
+                                    <button type="submit" class="btn btn-dark btn-sm w-100">Set stock level</button>
+                                </form>
+                                <p class="text-muted small mt-2 mb-0">
+                                    Records an adjustment for the difference between the
+                                    current and counted stock.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a th:href="@{/admin/inventory/transactions(productId=${inventory.productId})}"
+                       class="btn btn-outline-dark btn-sm">View movement history</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

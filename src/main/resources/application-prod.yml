@@ -1,3 +1,9 @@
+# JWT signing key must be supplied via environment (base64, >= 256 bits).
+# Startup fails if JWT_SECRET is not set - by design.
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+
 spring:
   datasource:
     url: ${DB_URL}
@@ -15,6 +21,13 @@ spring:
 
   thymeleaf:
     cache: true
+
+# API documentation is a development tool; keep it off in production.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 server:
   error:

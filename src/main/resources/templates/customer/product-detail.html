@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title th:text="${product.productName} + ' | General Store'">Product | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Done.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/products}">Shop</a></li>
+                <li class="breadcrumb-item">
+                    <a th:href="@{/products(category=${product.categorySlug})}"
+                       th:text="${product.categoryName}">Category</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page"
+                    th:text="${product.productName}">Product</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0 mb-5">
+            <div class="card-body p-4">
+                <div class="row g-4">
+
+                    <!-- Image gallery -->
+                    <div class="col-12 col-md-6 col-lg-5">
+                        <div th:if="${#lists.isEmpty(product.images)}"
+                             class="d-flex align-items-center justify-content-center bg-light rounded"
+                             style="height: 360px;">
+                            <span style="font-size: 5rem;" aria-hidden="true">&#128230;</span>
+                        </div>
+                        <th:block th:unless="${#lists.isEmpty(product.images)}">
+                            <img id="mainProductImage"
+                                 th:src="@{${product.images[0].imageUrl}}"
+                                 th:alt="${product.productName}"
+                                 class="img-fluid rounded w-100 mb-2"
+                                 style="height: 360px; object-fit: cover;">
+                            <div class="d-flex gap-2 flex-wrap" th:if="${#lists.size(product.images) > 1}">
+                                <img th:each="image : ${product.images}"
+                                     th:src="@{${image.imageUrl}}" alt=""
+                                     class="rounded border product-thumb"
+                                     width="64" height="64"
+                                     style="object-fit: cover; cursor: pointer;"
+                                     onclick="document.getElementById('mainProductImage').src = this.src;">
+                            </div>
+                        </th:block>
+                    </div>
+
+                    <!-- Product info -->
+                    <div class="col-12 col-md-6 col-lg-7">
+                        <p class="text-muted small mb-1" th:if="${product.brand != null}"
+                           th:text="${product.brand}">Brand</p>
+                        <h1 class="h3 fw-bold" th:text="${product.productName}">Product name</h1>
+
+                        <p class="mb-2">
+                            <a th:href="@{/products(category=${product.categorySlug})}"
+                               class="badge text-bg-light text-decoration-none border"
+                               th:text="${product.categoryName}">Category</a>
+                        </p>
+
+                        <div class="mb-3">
+                            <span th:if="${product.discountPrice != null}">
+                                <span class="h3 fw-bold me-2"
+                                      th:text="'₹' + ${#numbers.formatDecimal(product.discountPrice, 1, 2)}">₹80.00</span>
+                                <s class="text-muted"
+                                   th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 2)}">₹100.00</s>
+                                <span class="badge text-bg-danger ms-2">Sale</span>
+                            </span>
+                            <span th:if="${product.discountPrice == null}" class="h3 fw-bold"
+                                  th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 2)}">₹100.00</span>
+                        </div>
+
+                        <p class="mb-3">
+                            <span th:if="${product.availability.name() == 'IN_STOCK'}"
+                                  class="badge text-bg-success">In stock</span>
+                            <span th:if="${product.availability.name() == 'LOW_STOCK'}"
+                                  class="badge text-bg-warning">Only a few left</span>
+                            <span th:if="${product.availability.name() == 'OUT_OF_STOCK'}"
+                                  class="badge text-bg-secondary">Out of stock</span>
+                        </p>
+
+                        <p class="text-muted" th:if="${product.description != null}"
+                           th:text="${product.description}">Description</p>
+
+                        <!-- Authenticated: real cart actions -->
+                        <div class="mt-4" sec:authorize="isAuthenticated()"
+                             xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                            <form th:action="@{/cart/add}" method="post"
+                                  class="d-flex gap-2 flex-wrap align-items-center">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="productSlug" th:value="${product.slug}">
+                                <label for="quantity" class="visually-hidden">Quantity</label>
+                                <input type="number" id="quantity" name="quantity" value="1"
+                                       min="1" max="99" class="form-control form-control-lg"
+                                       style="width: 90px;"
+                                       th:disabled="${product.availability.name() == 'OUT_OF_STOCK'}">
+                                <button type="submit" name="redirectTo" value="product"
+                                        class="btn btn-dark btn-lg"
+                                        th:disabled="${product.availability.name() == 'OUT_OF_STOCK'}">
+                                    &#128722; Add to Cart
+                                </button>
+                                <button type="submit" name="redirectTo" value="cart"
+                                        class="btn btn-warning btn-lg"
+                                        th:disabled="${product.availability.name() == 'OUT_OF_STOCK'}">
+                                    Buy Now
+                                </button>
+                            </form>
+                            <form th:action="@{/customer/wishlist/add}" method="post"
+                                  class="d-inline mt-2" sec:authorize="hasRole('CUSTOMER')">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="productSlug" th:value="${product.slug}">
+                                <button type="submit" class="btn btn-outline-danger btn-lg">
+                                    &#9825; Add to Wishlist
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Anonymous: prompt to log in -->
+                        <div class="d-flex gap-2 flex-wrap mt-4" sec:authorize="isAnonymous()"
+                             xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                            <a th:href="@{/login}" class="btn btn-dark btn-lg">
+                                &#128722; Login to buy
+                            </a>
+                            <button type="button" class="btn btn-outline-danger btn-lg"
+                                    data-coming-soon="Wishlist">
+                                &#9825; Wishlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related products -->
+        <section th:if="${!#lists.isEmpty(relatedProducts)}">
+            <h2 class="h4 fw-bold mb-3">You may also like</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-3" th:each="related : ${relatedProducts}">
+                    <div th:replace="~{fragments/product-card :: card(${related})}"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

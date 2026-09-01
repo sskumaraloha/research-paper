@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Checkout | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+
+        <h1 class="h3 fw-bold mb-4">Checkout</h1>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <form th:action="@{/checkout/place-order}" th:object="${placeOrderRequest}" method="post">
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-8">
+                    <!-- Delivery address -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body">
+                            <h2 class="h6 fw-bold text-uppercase text-muted mb-3">
+                                1. Delivery address
+                            </h2>
+
+                            <div th:if="${#lists.isEmpty(addresses)}" class="text-center py-3">
+                                <p class="text-muted mb-2">You have no saved addresses.</p>
+                                <a th:href="@{/customer/addresses/new}" class="btn btn-dark btn-sm">
+                                    Add an address
+                                </a>
+                            </div>
+
+                            <div class="row g-2" th:unless="${#lists.isEmpty(addresses)}">
+                                <div class="col-12 col-md-6" th:each="address : ${addresses}">
+                                    <label class="card h-100 p-3 address-option">
+                                        <div class="d-flex align-items-start gap-2">
+                                            <input type="radio" th:field="*{addressId}"
+                                                   th:value="${address.id}"
+                                                   class="form-check-input mt-1">
+                                            <div class="small">
+                                                <strong th:text="${address.fullName}">Name</strong>
+                                                <span th:if="${address.defaultAddress}"
+                                                      class="badge text-bg-dark ms-1">Default</span><br>
+                                                <span th:text="${address.addressLine1}">Line 1</span><br>
+                                                <span th:text="${address.city + ', ' + address.state
+                                                                 + ' ' + address.pincode}">City</span><br>
+                                                <span class="text-muted"
+                                                      th:text="'Phone: ' + ${address.phoneNumber}">Phone</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-12">
+                                    <a th:href="@{/customer/addresses/new}" class="small">
+                                        + Add another address
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment method -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h2 class="h6 fw-bold text-uppercase text-muted mb-3">
+                                2. Payment method
+                            </h2>
+                            <div class="form-check mb-2">
+                                <input type="radio" th:field="*{paymentMethod}"
+                                       value="CASH_ON_DELIVERY" id="payCod"
+                                       class="form-check-input">
+                                <label for="payCod" class="form-check-label">
+                                    Cash on delivery
+                                    <span class="text-muted small d-block">
+                                        Pay in cash when your order arrives
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" value="ONLINE" id="payOnline"
+                                       class="form-check-input" disabled>
+                                <label for="payOnline" class="form-check-label text-muted">
+                                    Pay online
+                                    <span class="small d-block">
+                                        Coming soon — online payments are not available yet
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h2 class="h6 fw-bold text-uppercase text-muted mb-3">Your order</h2>
+                            <ul class="list-unstyled small mb-3">
+                                <li class="d-flex justify-content-between mb-1"
+                                    th:each="item : ${cart.items}">
+                                    <span>
+                                        <span th:text="${item.productName}">Product</span>
+                                        <span class="text-muted" th:text="'× ' + ${item.quantity}">× 1</span>
+                                    </span>
+                                    <span th:text="'₹' + ${#numbers.formatDecimal(item.lineTotal, 1, 2)}">₹0</span>
+                                </li>
+                            </ul>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Subtotal</span>
+                                <span th:text="'₹' + ${#numbers.formatDecimal(cart.subtotal, 1, 2)}">₹0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1 text-success"
+                                 th:if="${cart.discount.signum() > 0}">
+                                <span>Discount</span>
+                                <span th:text="'-₹' + ${#numbers.formatDecimal(cart.discount, 1, 2)}">-₹0</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                                <span>Total</span>
+                                <span th:text="'₹' + ${#numbers.formatDecimal(cart.total, 1, 2)}">₹0</span>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100 btn-lg"
+                                    th:disabled="${#lists.isEmpty(addresses)}">
+                                Place order
+                            </button>
+                            <a th:href="@{/cart}" class="btn btn-outline-secondary w-100 btn-sm mt-2">
+                                Back to cart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

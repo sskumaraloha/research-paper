@@ -1,5 +1,6 @@
 package com.store.app.product.service.impl;
 
+import com.store.app.cart.service.CartService;
 import com.store.app.category.entity.Category;
 import com.store.app.category.repository.CategoryRepository;
 import com.store.app.common.dto.PageResponse;
@@ -50,6 +51,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final FileStorageService fileStorageService;
     private final InventoryService inventoryService;
+    private final CartService cartService;
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
@@ -119,6 +121,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductImage::getImageUrl)
                 .toList();
 
+        cartService.removeProductFromCarts(id);
         inventoryService.deleteInventoryForProduct(id);
         productRepository.delete(product);
         imageUrls.forEach(fileStorageService::delete);

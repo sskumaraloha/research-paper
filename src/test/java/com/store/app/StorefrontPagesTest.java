@@ -80,10 +80,10 @@ class StorefrontPagesTest {
     }
 
     @Test
-    void productDetailRenders() throws Exception {
+    void productDetailRendersLoginPromptForAnonymous() throws Exception {
         mockMvc.perform(get("/products/" + productSlug))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Add to Cart")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Login to buy")));
     }
 
     @Test

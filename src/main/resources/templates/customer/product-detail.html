@@ -118,9 +118,13 @@
                                         th:disabled="${product.availability.name() == 'OUT_OF_STOCK'}">
                                     Buy Now
                                 </button>
-                                <button type="button" class="btn btn-outline-danger btn-lg"
-                                        data-coming-soon="Wishlist">
-                                    &#9825; Wishlist
+                            </form>
+                            <form th:action="@{/customer/wishlist/add}" method="post"
+                                  class="d-inline mt-2" sec:authorize="hasRole('CUSTOMER')">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="productSlug" th:value="${product.slug}">
+                                <button type="submit" class="btn btn-outline-danger btn-lg">
+                                    &#9825; Add to Wishlist
                                 </button>
                             </form>
                         </div>

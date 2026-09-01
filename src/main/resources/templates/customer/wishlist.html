@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>My Wishlist | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+
+        <h1 class="h3 fw-bold mb-4">My wishlist</h1>
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Done.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Error.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${#lists.isEmpty(wishlist)}" class="card shadow-sm border-0">
+            <div class="card-body text-center py-5">
+                <span class="display-3" aria-hidden="true">&#9825;</span>
+                <h2 class="h5 fw-bold mt-3">Your wishlist is empty</h2>
+                <p class="text-muted mb-3">Save products you like and find them here later.</p>
+                <a th:href="@{/products}" class="btn btn-dark">Browse products</a>
+            </div>
+        </div>
+
+        <div class="row g-3" th:unless="${#lists.isEmpty(wishlist)}">
+            <div class="col-6 col-md-4 col-lg-3" th:each="item : ${wishlist}">
+                <div class="card h-100 shadow-sm border-0">
+                    <a th:href="@{/products/{slug}(slug=${item.product.slug})}">
+                        <img th:if="${item.product.imageUrl != null}"
+                             th:src="@{${item.product.imageUrl}}" alt=""
+                             class="card-img-top" style="height: 160px; object-fit: cover;">
+                        <div th:if="${item.product.imageUrl == null}"
+                             class="card-img-top d-flex align-items-center justify-content-center bg-light"
+                             style="height: 160px;">
+                            <span class="fs-1" aria-hidden="true">&#128230;</span>
+                        </div>
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="h6 card-title">
+                            <a th:href="@{/products/{slug}(slug=${item.product.slug})}"
+                               class="text-decoration-none text-dark"
+                               th:text="${item.product.productName}">Product</a>
+                        </h3>
+                        <div class="mb-2">
+                            <span th:if="${item.product.discountPrice != null}">
+                                <span class="fw-bold"
+                                      th:text="'₹' + ${#numbers.formatDecimal(item.product.discountPrice, 1, 2)}">₹80</span>
+                                <s class="text-muted small"
+                                   th:text="'₹' + ${#numbers.formatDecimal(item.product.price, 1, 2)}">₹100</s>
+                            </span>
+                            <span th:if="${item.product.discountPrice == null}" class="fw-bold"
+                                  th:text="'₹' + ${#numbers.formatDecimal(item.product.price, 1, 2)}">₹100</span>
+                            <span th:unless="${item.product.inStock}"
+                                  class="badge text-bg-secondary ms-1">Out of stock</span>
+                        </div>
+                        <div class="mt-auto d-grid gap-1">
+                            <form th:action="@{/customer/wishlist/items/{id}/move-to-cart(id=${item.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-dark btn-sm w-100"
+                                        th:disabled="${!item.product.inStock}">
+                                    Move to cart
+                                </button>
+                            </form>
+                            <form th:action="@{/customer/wishlist/items/{id}/remove(id=${item.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                    Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

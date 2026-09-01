@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>Address | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/customer/addresses}">My addresses</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:text="${formTitle}">Add address</li>
+                    </ol>
+                </nav>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h1 class="h4 fw-bold mb-4" th:text="${formTitle}">Add address</h1>
+
+                        <form th:action="@{${formAction}}" th:object="${addressRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                            <div th:if="${#fields.hasGlobalErrors()}"
+                                 class="alert alert-danger" role="alert">
+                                <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                                   th:text="${err}">Error</p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-7">
+                                    <label for="fullName" class="form-label">Full name</label>
+                                    <input type="text" id="fullName" th:field="*{fullName}"
+                                           class="form-control" required minlength="2" maxlength="100"
+                                           th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}"
+                                         th:errors="*{fullName}">Name error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('fullName')}">
+                                        Please enter the recipient's full name.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-5">
+                                    <label for="phoneNumber" class="form-label">Phone number</label>
+                                    <input type="tel" id="phoneNumber" th:field="*{phoneNumber}"
+                                           class="form-control" required pattern="[0-9]{10}"
+                                           inputmode="numeric" maxlength="10"
+                                           th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}"
+                                         th:errors="*{phoneNumber}">Phone error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('phoneNumber')}">
+                                        Please enter exactly 10 digits.
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="addressLine1" class="form-label">Address line 1</label>
+                                    <input type="text" id="addressLine1" th:field="*{addressLine1}"
+                                           class="form-control" required maxlength="150"
+                                           placeholder="House no., building, street"
+                                           th:classappend="${#fields.hasErrors('addressLine1')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('addressLine1')}"
+                                         th:errors="*{addressLine1}">Address error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('addressLine1')}">
+                                        Please enter the address.
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="addressLine2" class="form-label">
+                                        Address line 2 <span class="text-muted">(optional)</span>
+                                    </label>
+                                    <input type="text" id="addressLine2" th:field="*{addressLine2}"
+                                           class="form-control" maxlength="150"
+                                           placeholder="Area, landmark">
+                                </div>
+
+                                <div class="col-12 col-md-5">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" id="city" th:field="*{city}"
+                                           class="form-control" required maxlength="80"
+                                           th:classappend="${#fields.hasErrors('city')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('city')}"
+                                         th:errors="*{city}">City error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('city')}">
+                                        Please enter the city.
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-4">
+                                    <label for="state" class="form-label">State</label>
+                                    <input type="text" id="state" th:field="*{state}"
+                                           class="form-control" required maxlength="80"
+                                           th:classappend="${#fields.hasErrors('state')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('state')}"
+                                         th:errors="*{state}">State error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('state')}">
+                                        Please enter the state.
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <label for="pincode" class="form-label">Pincode</label>
+                                    <input type="text" id="pincode" th:field="*{pincode}"
+                                           class="form-control" required pattern="[0-9]{6}"
+                                           inputmode="numeric" maxlength="6"
+                                           th:classappend="${#fields.hasErrors('pincode')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('pincode')}"
+                                         th:errors="*{pincode}">Pincode error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('pincode')}">
+                                        Exactly 6 digits.
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label for="country" class="form-label">Country</label>
+                                    <input type="text" id="country" th:field="*{country}"
+                                           class="form-control" required maxlength="80"
+                                           th:classappend="${#fields.hasErrors('country')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('country')}"
+                                         th:errors="*{country}">Country error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('country')}">
+                                        Please enter the country.
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" id="defaultAddress"
+                                               th:field="*{defaultAddress}"
+                                               class="form-check-input" role="switch">
+                                        <label for="defaultAddress" class="form-check-label">
+                                            Use as my default address
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 d-flex gap-2">
+                                    <button type="submit" class="btn btn-dark">Save address</button>
+                                    <a th:href="@{/customer/addresses}"
+                                       class="btn btn-outline-secondary">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

@@ -19,6 +19,7 @@ import com.store.app.product.entity.ProductImage;
 import com.store.app.product.mapper.ProductMapper;
 import com.store.app.product.repository.ProductRepository;
 import com.store.app.product.service.ProductService;
+import com.store.app.wishlist.service.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
     private final FileStorageService fileStorageService;
     private final InventoryService inventoryService;
     private final CartService cartService;
+    private final WishlistService wishlistService;
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
@@ -122,6 +124,7 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
 
         cartService.removeProductFromCarts(id);
+        wishlistService.removeProductFromWishlists(id);
         inventoryService.deleteInventoryForProduct(id);
         productRepository.delete(product);
         imageUrls.forEach(fileStorageService::delete);

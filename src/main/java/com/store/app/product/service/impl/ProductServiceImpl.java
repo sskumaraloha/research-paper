@@ -9,6 +9,7 @@ import com.store.app.exception.BusinessValidationException;
 import com.store.app.exception.DuplicateResourceException;
 import com.store.app.exception.ResourceNotFoundException;
 import com.store.app.inventory.service.InventoryService;
+import com.store.app.order.service.OrderService;
 import com.store.app.product.dto.ProductCardResponse;
 import com.store.app.product.dto.ProductDetailResponse;
 import com.store.app.product.dto.ProductFilterRequest;
@@ -54,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
     private final InventoryService inventoryService;
     private final CartService cartService;
     private final WishlistService wishlistService;
+    private final OrderService orderService;
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
@@ -125,6 +127,7 @@ public class ProductServiceImpl implements ProductService {
 
         cartService.removeProductFromCarts(id);
         wishlistService.removeProductFromWishlists(id);
+        orderService.detachProductFromOrders(id);
         inventoryService.deleteInventoryForProduct(id);
         productRepository.delete(product);
         imageUrls.forEach(fileStorageService::delete);

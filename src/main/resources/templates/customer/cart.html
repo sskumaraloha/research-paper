@@ -144,10 +144,9 @@
                             <span>Total</span>
                             <span th:text="'₹' + ${#numbers.formatDecimal(cart.total, 1, 2)}">₹260.00</span>
                         </div>
-                        <button type="button" class="btn btn-dark w-100 btn-lg"
-                                data-coming-soon="Checkout">
+                        <a th:href="@{/checkout}" class="btn btn-dark w-100 btn-lg">
                             Proceed to checkout
-                        </button>
+                        </a>
                         <p class="text-muted small mt-2 mb-0">
                             Stock is reserved when you place the order, not while items sit in the cart.
                         </p>

@@ -1,6 +1,8 @@
 package com.store.app.user.service;
 
+import com.store.app.user.dto.ChangePasswordRequest;
 import com.store.app.user.dto.CreateUserRequest;
+import com.store.app.user.dto.UpdateProfileRequest;
 import com.store.app.user.dto.UpdateUserRequest;
 import com.store.app.user.dto.UserResponse;
 
@@ -39,4 +41,23 @@ public interface UserService {
 
     /** Enables or disables a user account. */
     UserResponse setUserEnabled(Long id, boolean enabled);
+
+    /**
+     * Self-service profile update: name and email only. Roles and the
+     * verified phone number are untouchable through this path.
+     *
+     * @throws com.store.app.exception.DuplicateResourceException
+     *         if the new email belongs to another account
+     */
+    UserResponse updateProfile(Long userId, UpdateProfileRequest request);
+
+    /**
+     * Self-service password change. The new password is BCrypt-encoded
+     * and {@code passwordChangedAt} is stamped, revoking all previously
+     * issued JWT access tokens.
+     *
+     * @throws com.store.app.exception.AuthenticationFailedException
+     *         if the current password is wrong
+     */
+    void changePassword(Long userId, ChangePasswordRequest request);
 }

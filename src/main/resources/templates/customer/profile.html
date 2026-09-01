@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(~{::title})}">
+    <title>My Profile | General Store</title>
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-7">
+
+                <h1 class="h3 fw-bold mb-4">My profile</h1>
+
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}">Done.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Account summary -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h2 class="h6 fw-bold text-uppercase text-muted mb-3">Account</h2>
+                        <div class="row g-2 small">
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted">Phone number</span><br>
+                                <span class="fw-semibold" th:text="${profile.phoneNumber}">9999999999</span>
+                                <span th:if="${profile.phoneVerified}"
+                                      class="badge text-bg-success ms-1">Verified</span>
+                                <span th:unless="${profile.phoneVerified}"
+                                      class="badge text-bg-warning ms-1">Not verified</span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <span class="text-muted">Member since</span><br>
+                                <span class="fw-semibold"
+                                      th:text="${#temporals.format(profile.createdAt, 'dd MMM yyyy')}">date</span>
+                            </div>
+                        </div>
+                        <p class="form-text mb-0 mt-2">
+                            Your phone number is your login and is verified by OTP, so it
+                            cannot be changed here.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Profile details -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h2 class="h6 fw-bold text-uppercase text-muted mb-3">Profile details</h2>
+                        <form th:action="@{/customer/profile}" th:object="${updateProfileRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                            <div th:if="${#fields.hasGlobalErrors()}"
+                                 class="alert alert-danger" role="alert">
+                                <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                                   th:text="${err}">Error</p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="firstName" class="form-label">First name</label>
+                                    <input type="text" id="firstName" th:field="*{firstName}"
+                                           class="form-control" required minlength="2" maxlength="50"
+                                           th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}"
+                                         th:errors="*{firstName}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('firstName')}">
+                                        Please enter your first name.
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="lastName" class="form-label">Last name</label>
+                                    <input type="text" id="lastName" th:field="*{lastName}"
+                                           class="form-control" required maxlength="50"
+                                           th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}"
+                                         th:errors="*{lastName}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('lastName')}">
+                                        Please enter your last name.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Email address</label>
+                                    <input type="email" id="email" th:field="*{email}"
+                                           class="form-control" required maxlength="100"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+                                         th:errors="*{email}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-dark">Save changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Change password -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h2 class="h6 fw-bold text-uppercase text-muted mb-3">Change password</h2>
+                        <form th:action="@{/customer/profile/password}"
+                              th:object="${changePasswordRequest}"
+                              method="post" class="needs-validation" novalidate>
+
+                            <div th:if="${#fields.hasGlobalErrors()}"
+                                 class="alert alert-danger" role="alert">
+                                <p class="mb-0" th:each="err : ${#fields.globalErrors()}"
+                                   th:text="${err}">Error</p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="currentPassword" class="form-label">Current password</label>
+                                    <input type="password" id="currentPassword"
+                                           th:field="*{currentPassword}"
+                                           class="form-control" required
+                                           autocomplete="current-password"
+                                           th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}"
+                                         th:errors="*{currentPassword}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('currentPassword')}">
+                                        Please enter your current password.
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="newPassword" class="form-label">New password</label>
+                                    <input type="password" id="newPassword" th:field="*{newPassword}"
+                                           class="form-control" required minlength="8" maxlength="64"
+                                           autocomplete="new-password"
+                                           th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}"
+                                         th:errors="*{newPassword}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('newPassword')}">
+                                        At least 8 characters with uppercase, lowercase, digit and special character.
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="confirmPassword" class="form-label">Confirm new password</label>
+                                    <input type="password" id="confirmPassword"
+                                           th:field="*{confirmPassword}"
+                                           class="form-control" required autocomplete="new-password"
+                                           data-match-target="newPassword"
+                                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}"
+                                         th:errors="*{confirmPassword}">Error</div>
+                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('confirmPassword')}">
+                                        Passwords do not match.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-outline-dark">Change password</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

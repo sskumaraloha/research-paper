@@ -1,8 +1,11 @@
 package com.store.app.user.service.impl;
 
+import com.store.app.exception.AuthenticationFailedException;
 import com.store.app.exception.DuplicateResourceException;
 import com.store.app.exception.ResourceNotFoundException;
+import com.store.app.user.dto.ChangePasswordRequest;
 import com.store.app.user.dto.CreateUserRequest;
+import com.store.app.user.dto.UpdateProfileRequest;
 import com.store.app.user.dto.UpdateUserRequest;
 import com.store.app.user.dto.UserResponse;
 import com.store.app.user.entity.Role;
@@ -113,6 +116,38 @@ public class UserServiceImpl implements UserService {
         User user = findUserById(id);
         user.setEnabled(enabled);
         return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = findUserById(userId);
+
+        String newEmail = request.getEmail().toLowerCase().trim();
+        if (!user.getEmail().equals(newEmail) && userRepository.existsByEmail(newEmail)) {
+            throw new DuplicateResourceException("email",
+                    "Email is already registered: " + newEmail);
+        }
+
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
+        user.setEmail(newEmail);
+        // Deliberately untouched: roles, phone number, enabled, phoneVerified.
+
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = findUserById(userId);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new AuthenticationFailedException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Revokes every JWT issued before this moment (checked by the JWT filter).
+        user.setPasswordChangedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
     }
 
     private User findUserById(Long id) {

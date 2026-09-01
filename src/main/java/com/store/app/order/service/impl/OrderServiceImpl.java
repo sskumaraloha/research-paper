@@ -25,8 +25,8 @@ import com.store.app.order.repository.OrderItemRepository;
 import com.store.app.order.repository.OrderRepository;
 import com.store.app.order.service.OrderService;
 import com.store.app.payment.entity.Payment;
-import com.store.app.payment.entity.PaymentMethod;
-import com.store.app.payment.entity.PaymentStatus;
+import com.store.app.payment.service.PaymentService;
+import com.store.app.payment.service.PaymentServiceRegistry;
 import com.store.app.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartMapper cartMapper;
     private final AddressService addressService;
     private final InventoryService inventoryService;
+    private final PaymentServiceRegistry paymentServiceRegistry;
     private final OrderMapper orderMapper;
 
     @Override
@@ -66,8 +67,12 @@ public class OrderServiceImpl implements OrderService {
                 .filter(c -> !c.getItems().isEmpty())
                 .orElseThrow(() -> new BusinessValidationException("Your cart is empty"));
 
-        // 2. Ownership-checked address, snapshotted below.
+        // 2. Ownership-checked address, snapshotted below. The payment
+        //    method must have an active implementation (fails fast for
+        //    methods that are defined but not integrated yet).
         AddressResponse address = addressService.getAddress(userId, request.getAddressId());
+        PaymentService paymentService =
+                paymentServiceRegistry.getService(request.getPaymentMethod());
 
         String orderNumber = generateOrderNumber();
 
@@ -106,14 +111,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 5. Order with item + address snapshots and the payment record.
-        OrderStatus initialStatus = request.getPaymentMethod() == PaymentMethod.CASH_ON_DELIVERY
-                ? OrderStatus.CONFIRMED   // COD needs no upfront payment
-                : OrderStatus.PENDING;    // ONLINE awaits payment processing
-
+        //    The payment strategy decides the initial order status.
         Order order = new Order(
                 orderNumber,
                 cart.getUser(),
-                initialStatus,
+                paymentService.initialOrderStatus(),
                 toShippingAddress(address),
                 subtotal,
                 subtotal.subtract(total),
@@ -129,8 +131,7 @@ public class OrderServiceImpl implements OrderService {
                     line.getQuantity()));
         }
 
-        order.attachPayment(new Payment(
-                request.getPaymentMethod(), PaymentStatus.PENDING, total));
+        order.attachPayment(paymentService.initiatePayment(order));
 
         Order saved = orderRepository.save(order);
 
@@ -184,9 +185,8 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.CANCELLED);
         Payment payment = order.getPayment();
-        payment.setStatus(payment.getStatus() == PaymentStatus.PAID
-                ? PaymentStatus.REFUNDED
-                : PaymentStatus.FAILED);
+        paymentServiceRegistry.getService(payment.getPaymentMethod())
+                .cancelPayment(payment);
 
         return orderMapper.toResponse(orderRepository.save(order));
     }

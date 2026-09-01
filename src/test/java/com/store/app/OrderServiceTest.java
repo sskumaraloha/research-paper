@@ -182,6 +182,21 @@ class OrderServiceTest {
     }
 
     @Test
+    void onlinePaymentIsRejectedUntilAGatewayExists() {
+        cartService.addToCart(userId, addRequest(plainProductId, 1));
+
+        assertThatThrownBy(() -> orderService.placeOrder(
+                userId, placeRequest(PaymentMethod.ONLINE)))
+                .isInstanceOf(BusinessValidationException.class)
+                .hasMessageContaining("not available yet");
+
+        // Fully rolled back: no order, cart intact, stock untouched.
+        assertThat(orderService.getOrders(userId, 0, 10).totalElements()).isZero();
+        assertThat(cartService.getCart(userId).items()).hasSize(1);
+        assertThat(inventoryService.getByProductId(plainProductId).currentStock()).isEqualTo(3);
+    }
+
+    @Test
     void emptyCartCannotCheckOut() {
         assertThatThrownBy(() -> orderService.placeOrder(
                 userId, placeRequest(PaymentMethod.CASH_ON_DELIVERY)))

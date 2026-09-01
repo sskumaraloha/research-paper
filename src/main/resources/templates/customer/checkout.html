@@ -82,13 +82,12 @@
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input type="radio" th:field="*{paymentMethod}"
-                                       value="ONLINE" id="payOnline"
-                                       class="form-check-input">
-                                <label for="payOnline" class="form-check-label">
+                                <input type="radio" value="ONLINE" id="payOnline"
+                                       class="form-check-input" disabled>
+                                <label for="payOnline" class="form-check-label text-muted">
                                     Pay online
-                                    <span class="text-muted small d-block">
-                                        Order stays pending until the payment completes
+                                    <span class="small d-block">
+                                        Coming soon — online payments are not available yet
                                     </span>
                                 </label>
                             </div>

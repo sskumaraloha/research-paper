@@ -1,0 +1,30 @@
+# Spring Boot / Maven (for the future implementation)
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env & secrets — never commit
+.env
+.env.*
+application-local.yml
+*.pem
+*.p12
+
+# Logs & temp
+logs/
+*.log
+tmp/

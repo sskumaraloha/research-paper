@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogSense Maintenance Intelligence</title>
+  <meta name="description" content="Client demo prototype — turn years of maintenance history into searchable intelligence. Demo data only.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a78d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- ================= LOGIN ================= -->
+  <div id="login-screen">
+    <section class="login-brand" aria-label="LogSense introduction">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">LOGSENSE</div>
+          <div class="brand-sub">MAINTENANCE INTELLIGENCE</div>
+        </div>
+      </div>
+
+      <h1 class="login-tagline">Turn years of maintenance history into searchable intelligence.</h1>
+
+      <div class="login-story" aria-hidden="true">
+        <div class="story-raw">MTR brng noise L3 conv, replcd 6205ZZ, algnmnt chk, OK
+packing m/c 4 ka belt slip... belt change kiya, 1.5 hr gaya
+CONV TRIP L3 VFD</div>
+        <div class="story-arrow">
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+          LogSense
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </div>
+        <div class="story-clean">
+          <span class="story-chip">Machine: Line 3 Conveyor Motor</span>
+          <span class="story-chip">Failure: Bearing noise</span>
+          <span class="story-chip">Part: 6205ZZ</span>
+          <span class="story-chip">Downtime: 2.0 hrs</span>
+          <span class="story-chip">Pattern: ~92-day recurrence</span>
+        </div>
+      </div>
+
+      <div class="login-points">
+        <div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Searchable in plain Hindi / English</div>
+        <div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Live in 4 weeks — without a single sensor</div>
+        <div><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Every answer traceable to the original record</div>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-card">
+        <h1>Sign in</h1>
+        <p class="login-sub">Enterprise access for your plant team.</p>
+        <div class="login-plant">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <div><strong>Demo Plant</strong>Pune Manufacturing Facility</div>
+        </div>
+        <form id="login-form">
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" placeholder="rajesh.kumar@demoplant.in" autocomplete="username">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+        </form>
+        <div class="login-divider">or</div>
+        <button class="btn btn-block" id="demo-login" type="button">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Demo login — Maintenance Manager
+        </button>
+        <p class="login-foot">Demo environment with preloaded Demo Plant data.<br>No real credentials required.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= APP SHELL ================= -->
+  <div id="app" hidden>
+    <aside id="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">LOGSENSE</div>
+          <div class="brand-sub">MAINTENANCE INTELLIGENCE</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="sidebar-foot">Demo Pune Manufacturing Plant<br>Demo dataset · v0.9 prototype</div>
+    </aside>
+
+    <div id="main">
+      <header id="topbar">
+        <button class="icon-btn" id="nav-toggle" aria-label="Open navigation">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <button class="plant-chip" id="btn-plant" aria-haspopup="true">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Demo Pune Plant</span>
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+
+        <div class="gsearch">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="gsearch-input" type="search" placeholder="Search machines, records, parts… (try “brng” or 6205ZZ)" aria-label="Global search" autocomplete="off">
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <span class="demo-pill">Demo Environment</span>
+
+        <button class="icon-btn" id="btn-notif" aria-label="Notifications" aria-haspopup="true">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="dot" aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn" id="btn-help" aria-label="Help and demo script">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+
+        <button class="user-chip" id="btn-user" aria-haspopup="true">
+          <span class="avatar">RK</span>
+          <span class="user-meta">
+            <span class="user-name">Rajesh Kumar</span><br>
+            <span class="user-role">Maintenance Manager</span>
+          </span>
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </header>
+
+      <main id="view" tabindex="-1" aria-live="polite"></main>
+    </div>
+  </div>
+
+  <!-- Overlays -->
+  <div id="drawer-scrim" hidden></div>
+  <aside id="drawer" hidden aria-label="Details drawer"></aside>
+  <div id="modal-scrim" hidden><div id="modal" role="dialog" aria-modal="true"></div></div>
+  <div id="toasts" aria-live="polite"></div>
+
+  <!-- Chart.js (pinned, cdnjs). The app degrades gracefully if offline. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/machines.js"></script>
+  <script src="js/assistant.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/patterns.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/whatsapp.js"></script>
+</body>
+</html>

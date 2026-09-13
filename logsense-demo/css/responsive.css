@@ -1,0 +1,88 @@
+/* ==========================================================================
+   LogSense — responsive rules (desktop-first; tablet & phone adjustments)
+   ========================================================================== */
+
+/* Laptop / small desktop */
+@media (max-width: 1180px) {
+  .wa-layout { grid-template-columns: 1fr; }
+  .wa-aside { max-width: 560px; margin: 0 auto; width: 100%; }
+}
+
+/* Tablet */
+@media (max-width: 960px) {
+  :root { --sidebar-w: 200px; }
+  #login-screen { grid-template-columns: 1fr; }
+  .login-brand { padding: 34px 24px; }
+  .login-story { display: none; }
+  .vq-item { grid-template-columns: 1fr; }
+  .vq-left { border-right: none; border-bottom: 1px solid var(--line); }
+  .gsearch { width: 200px; }
+  .kv { grid-template-columns: 112px 1fr; }
+}
+
+/* Phone */
+@media (max-width: 760px) {
+  #app { flex-direction: column; }
+
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: min(280px, 84vw);
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: none;
+  }
+  #sidebar.open {
+    transform: none;
+    box-shadow: var(--shadow-3);
+  }
+  #sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 27, 39, 0.44);
+    z-index: 29;
+  }
+  #nav-toggle { display: grid; }
+
+  #topbar { padding: 0 12px; gap: 8px; }
+  .plant-chip span { display: none; }
+  .demo-pill { display: none; }
+  .user-chip .user-meta { display: none; }
+  .gsearch { width: 100%; max-width: 170px; }
+
+  #view { padding: 16px 16px 40px; }
+  .page-head h1 { font-size: 18px; }
+
+  .grid-kpi { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 22px; }
+  .chart-box { height: 220px; }
+
+  .msg-bubble { max-width: 92%; }
+  .chat-layout { min-height: calc(100vh - var(--topbar-h) - 40px); }
+
+  .phone { border-radius: 26px; padding: 8px; }
+  .phone-screen { height: 540px; border-radius: 20px; }
+
+  .tl-meta { gap: 5px 12px; }
+  .kv { grid-template-columns: 1fr; gap: 2px 0; }
+  .kv dt { margin-top: 7px; }
+
+  .menu-pop { right: 8px; left: 8px; width: auto; }
+  .gsearch-results { position: fixed; left: 12px; right: 12px; top: calc(var(--topbar-h) + 4px); width: auto; }
+}
+
+/* Hide the mobile nav toggle on larger screens */
+#nav-toggle { display: none; }
+@media (max-width: 760px) {
+  #nav-toggle {
+    display: grid;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-kpi { grid-template-columns: 1fr 1fr; }
+  .page-actions .btn { flex: 1; }
+  .closing h1 { font-size: 28px; }
+}

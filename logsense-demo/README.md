@@ -20,6 +20,17 @@ Open `index.html` in any modern browser — that’s it. No server or build requ
 Click **“Demo login”** on the login screen to enter as *Rajesh Kumar,
 Maintenance Manager* of the **Demo Pune Manufacturing Plant**.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Plant dashboard](screenshots/dashboard.png) | ![Machine detail with timeline](screenshots/machine-detail.png) |
+| *Plant dashboard — KPIs, charts, AI-detected insights* | *Machine detail — stats, Pareto, raw-log timeline* |
+| ![AI assistant](screenshots/ai-assistant.png) | ![WhatsApp technician agent](screenshots/whatsapp-agent.png) |
+| *AI assistant — structured, cited, badge-labelled answers* | *WhatsApp agent — Hinglish report → record #2048* |
+| ![Validation queue](screenshots/validation-queue.png) | ![Login](screenshots/login.png) |
+| *Validation queue — alias bulk-mapping + split-screen review* | *Login — the before/after story* |
+
 ## The 9-minute demo journey
 
 The whole UI is built around one clickable story (also available in-app:
@@ -86,6 +97,8 @@ The search layer expands technician shorthand before matching, so
 `brng`, `BRG`, `bearng`, `bearing gaya` and `motor bearing sound` all resolve
 to bearing-related records, with a “Why this result matched” explanation.
 Try it in the global search bar, Maintenance History, or the assistant.
+Press **`/`** anywhere in the app to jump to global search, which returns
+machines, maintenance records, spare parts **and AI insights**.
 
 ---
 

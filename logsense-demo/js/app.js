@@ -407,6 +407,23 @@ window.LS = window.LS || {};
 
   /* Global search */
 
+  const INSIGHT_INDEX = [
+    { title: "Recurring bearing failure — Line 3 Conveyor Motor", sub: "~92-day recurrence · HYPOTHESIS", route: "machine/CONV-L3-MTR-01", kw: "bearing recurrence conveyor line 3 l3 motor pattern insight 6205" },
+    { title: "Temporary fix recurrence — Blister Machine 2", sub: "Sensor cleaning followed by repeat stoppage", route: "machine/BLST-L1-02", kw: "sensor blister temporary fix stoppage pattern insight proximity" },
+    { title: "Spare part concentration — 6205ZZ", sub: "3 machines · Line 3 majority share", route: "parts", kw: "6205 6205zz bearing part concentration spare insight" },
+    { title: "Downtime hotspot — Line 3", sub: "Highest downtime contribution", route: "patterns", kw: "downtime hotspot line 3 l3 insight pattern" },
+    { title: "Technician note — Pump P-201 shaft runout", sub: "Captured hypothesis on recurring seal leak", route: "machine/PUMP-UT-201", kw: "pump p-201 seal leak runout gland packing insight hypothesis" },
+  ];
+
+  function searchInsights(q) {
+    const terms = LS.data.normalizeQuery(q).split(/\s+/).filter((t) => t.length >= 2);
+    if (!terms.length) return [];
+    return INSIGHT_INDEX.filter((ins) => {
+      const hay = (ins.title + " " + ins.kw).toLowerCase();
+      return terms.some((t) => hay.includes(t));
+    }).slice(0, 3);
+  }
+
   function runGlobalSearch(q) {
     const old = document.getElementById("gsearch-results");
     if (old) old.remove();
@@ -418,8 +435,15 @@ window.LS = window.LS || {};
     const machines = LS.data.searchMachines(q).slice(0, 4);
     const records = LS.data.searchRecords(q, 5);
     const parts = LS.data.partStats().filter((p) => p.part.toLowerCase().includes(q.toLowerCase())).slice(0, 3);
+    const insights = searchInsights(q);
 
     let html = "";
+    if (insights.length) {
+      html += '<div class="gsr-group">Insights</div>' + insights.map((ins) =>
+        '<button class="gsr-item" onclick="LS.go(\'' + ins.route + '\')">' + icon("zap") +
+        '<span><span class="gsr-title">' + LS.esc(ins.title) + '</span><br><span class="gsr-sub">' + LS.esc(ins.sub) + "</span></span></button>"
+      ).join("");
+    }
     if (machines.length) {
       html += '<div class="gsr-group">Machines</div>' + machines.map((m) =>
         '<button class="gsr-item" onclick="LS.go(\'machine/' + m.id + '\')">' + icon("box") +
@@ -507,6 +531,12 @@ window.LS = window.LS || {};
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") { LS.closeDrawer(); LS.closeModal(); closeMenus(); }
+      // "/" focuses global search (unless typing in a field)
+      if (e.key === "/" && !e.target.closest("input, textarea, select") && stateObj.loggedIn) {
+        e.preventDefault();
+        gs.focus();
+        gs.select();
+      }
     });
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".menu-pop") && !e.target.closest(".gsearch")) closeMenus();

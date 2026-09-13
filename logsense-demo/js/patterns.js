@@ -84,12 +84,21 @@
   function partDrawer(partName) {
     const p = D().partByName(partName);
     if (!p) return;
+    // Replacement frequency: average days between recorded uses (plant-wide)
+    let freqHtml = "";
+    if (p.records.length >= 2) {
+      const dates = p.records.map((r) => new Date(r.date)).sort((a, b) => a - b);
+      const avgDays = Math.round((dates[dates.length - 1] - dates[0]) / 864e5 / (dates.length - 1));
+      freqHtml = '<div class="ir-stat"><b>~' + avgDays + " days</b><span>avg between replacements</span></div>";
+    }
     LS.openDrawer(
       '<div class="drawer-head"><h2>' + esc(p.part) + '</h2><button class="icon-btn" data-close-drawer aria-label="Close">' + icon("x") + "</button></div>" +
       '<div class="drawer-body">' +
       '<div class="import-result" style="grid-template-columns:1fr 1fr">' +
       '<div class="ir-stat"><b>' + p.machines.length + "</b><span>machines</span></div>" +
       '<div class="ir-stat"><b>' + p.count + "</b><span>recorded replacements</span></div>" +
+      freqHtml +
+      '<div class="ir-stat"><b>' + D().fmtDate(p.last) + "</b><span>last used</span></div>" +
       "</div>" +
       '<div><div class="raw-label">' + icon("box", "ic-sm") + "Machines using this part</div>" +
       "<ul style='margin:0;padding-left:18px;display:grid;gap:4px'>" + p.machines.map((mid) => {

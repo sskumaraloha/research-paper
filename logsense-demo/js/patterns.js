@@ -23,8 +23,8 @@
       const isNew = LS.state.get("whatsappAdded");
 
       host.innerHTML =
-        '<div class="page-head"><div><h1>Failure Patterns</h1>' +
-        '<p class="page-sub">Patterns detected from the recorded history, with evidence counts. Hypotheses stay hypotheses — nothing here is a confirmed root cause.</p></div>' +
+        '<div class="page-head"><div><h1>' + LS.t("pat.title") + "</h1>" +
+        '<p class="page-sub">' + LS.t("pat.sub") + "</p></div>" +
         '<div class="page-actions"><span class="flex">' + LS.trustBadge("FACT") + LS.trustBadge("CALCULATED") + LS.trustBadge("HYPOTHESIS") + "</span></div></div>" +
 
         '<div class="grid grid-2">' +
@@ -124,12 +124,13 @@
   LS.views.parts = {
     render(host) {
       const parts = D().partStats();
+      const t = LS.t;
       host.innerHTML =
-        '<div class="page-head"><div><h1>Spare Parts Intelligence</h1>' +
-        '<p class="page-sub">Part consumption reconstructed from maintenance records — which parts, on which machines, how often.</p></div>' +
+        '<div class="page-head"><div><h1>' + t("parts.title") + "</h1>" +
+        '<p class="page-sub">' + t("parts.sub") + "</p></div>" +
         '<div class="page-actions">' + LS.trustBadge("CALCULATED") + "</div></div>" +
         '<div class="card"><div class="table-wrap"><table class="tbl" aria-label="Spare parts">' +
-        "<thead><tr><th>Part</th><th class='num'>Machines</th><th class='num'>Usage</th><th>Last used</th><th>Trend</th><th></th></tr></thead><tbody>" +
+        "<thead><tr><th>" + t("lbl.part") + "</th><th class='num'>" + t("ai.machinesLbl") + "</th><th class='num'>" + t("lbl.usage") + "</th><th>" + t("lbl.lastUsed") + "</th><th>" + t("lbl.trend") + "</th><th></th></tr></thead><tbody>" +
         parts.map((p) =>
           '<tr class="row-link" tabindex="0" data-part="' + esc(p.part) + '">' +
           "<td><b>" + esc(p.part) + "</b></td>" +
@@ -137,7 +138,7 @@
           '<td class="num">' + p.count + "</td>" +
           "<td>" + D().fmtDate(p.last) + "</td>" +
           "<td>" + trendBadge(p.trend) + "</td>" +
-          '<td><button class="btn btn-sm btn-ghost">' + icon("eye") + "Details</button></td></tr>"
+          '<td><button class="btn btn-sm btn-ghost">' + icon("eye") + t("btn.details") + "</button></td></tr>"
         ).join("") +
         "</tbody></table></div></div>" +
         '<p class="small muted mt-14">Usage counts come from records that explicitly mention the part — a conservative lower bound on real consumption.</p>';
@@ -151,10 +152,10 @@
         if (tr && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); partDrawer(tr.dataset.part); }
       });
 
-      function trendBadge(t) {
+      function trendBadge(tr) {
         const map = { High: "status-recurring", Medium: "status-attention", Stable: "status-healthy" };
         const icons = { High: "trending", Medium: "activity", Stable: "check" };
-        return '<span class="status-badge ' + map[t] + '">' + icon(icons[t]) + t + "</span>";
+        return '<span class="status-badge ' + map[tr] + '">' + icon(icons[tr]) + LS.t("trend." + tr) + "</span>";
       }
     },
   };

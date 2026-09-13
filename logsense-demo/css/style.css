@@ -56,7 +56,7 @@
   --shadow-2: 0 4px 16px rgba(23, 34, 46, 0.10), 0 2px 4px rgba(23, 34, 46, 0.05);
   --shadow-3: 0 16px 48px rgba(23, 34, 46, 0.18);
 
-  --font: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font: "IBM Plex Sans", "IBM Plex Sans Devanagari", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
   --sidebar-w: 232px;
@@ -283,6 +283,50 @@ code, .mono { font-family: var(--mono); }
   height: 7px;
   border-radius: 99px;
   background: var(--warn);
+}
+
+.lang-switch select {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.lang-switch select:hover { background: var(--surface); }
+.lang-switch select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.login-langs {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin: -6px 0 12px;
+}
+.lang-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 99px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.lang-btn:hover { background: var(--accent-softer); color: var(--accent-strong); }
+.lang-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .icon-btn {

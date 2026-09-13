@@ -535,10 +535,16 @@ window.LS = window.LS || {};
     mtr: "motor", conv: "conveyor", "m/c": "machine", mc: "machine",
     replcd: "replaced", chng: "changed", algnmnt: "alignment", chk: "check",
     comp: "compressor", hyd: "hydraulic",
+    // Devanagari (Hindi/Marathi) -> canonical English search terms
+    "बेयरिंग": "bearing", "बेअरिंग": "bearing", "सेंसर": "sensor", "सेन्सर": "sensor",
+    "बेल्ट": "belt", "कपलिंग": "coupling", "मोटर": "motor",
+    "कन्वेयर": "conveyor", "कन्व्हेयर": "conveyor", "डाउनटाइम": "downtime",
+    "मशीन": "machine", "गळती": "leakage", "लीकेज": "leakage",
   };
 
   function normalizeQuery(q) {
-    let s = " " + q.toLowerCase() + " ";
+    let s = " " + q.toLowerCase().replace(/[?!.,;:।"']/g, " ") + " ";
+    s = s.replace(/\s+/g, " ");
     Object.entries(SYNONYMS).forEach(([k, v]) => {
       s = s.split(" " + k + " ").join(" " + v + " ");
     });
@@ -597,7 +603,7 @@ window.LS = window.LS || {};
     return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
   }
   function isToday(iso) { return iso === todayIso; }
-  function fmtHrs(n) { return (Math.round(n * 10) / 10) + " hrs"; }
+  function fmtHrs(n) { return (Math.round(n * 10) / 10) + " " + (LS.t ? LS.t("unit.hrs") : "hrs"); }
 
   /* Exports */
 

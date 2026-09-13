@@ -20,6 +20,26 @@ Open `index.html` in any modern browser — that’s it. No server or build requ
 Click **“Demo login”** on the login screen to enter as *Rajesh Kumar,
 Maintenance Manager* of the **Demo Pune Manufacturing Plant**.
 
+## Languages — English · हिंदी · मराठी
+
+The whole UI switches between **English, Hindi and Marathi** — pick a language
+on the login screen or from the selector in the top bar. Built for the
+shop-floor part of the demo: navigation, dashboards, machine pages, badges
+(तथ्य / गणना / अनुमान–अंदाज), the validation queue, the WhatsApp agent’s
+replies and the closing slide all render in the selected language.
+
+- The **AI assistant understands Devanagari questions** too — e.g.
+  “Line 3 पर बेयरिंग खराबी का कुल डाउनटाइम कितना?” or
+  “कोणत्या मशीनमध्ये वारंवार बेअरिंग खराब झाले?” — and answers in the
+  selected language with the same deterministic numbers.
+- **Raw log entries are never translated** — they are the authentic messy
+  source data (“MTR brng noise L3 conv…”) the product reads.
+
+| | |
+|---|---|
+| ![Assistant in Hindi](screenshots/assistant-hindi.png) | ![WhatsApp agent in Hindi](screenshots/whatsapp-hindi.png) |
+| *AI assistant answering in Hindi* | *WhatsApp flow in Hindi* |
+
 ## Screenshots
 
 | | |

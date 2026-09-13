@@ -32,7 +32,7 @@
   LS.views.users = {
     render(host) {
       host.innerHTML =
-        '<div class="page-head"><div><h1>Users &amp; Roles</h1>' +
+        '<div class="page-head"><div><h1>' + LS.t("users.title") + "</h1>" +
         '<p class="page-sub">Role-based access for the plant team. UI simulation — accounts are not editable in this demo.</p></div></div>' +
         '<div class="grid grid-2">' +
         ROLES.map((r) =>
@@ -63,7 +63,7 @@
     render(host) {
       const aliasMapped = LS.state.get("aliasMapped");
       host.innerHTML =
-        '<div class="page-head"><div><h1>Settings</h1>' +
+        '<div class="page-head"><div><h1>' + LS.t("settings.title") + "</h1>" +
         '<p class="page-sub">Plant configuration for ' + esc(D().plant.name) + ".</p></div>" +
         '<div class="page-actions"><button class="btn" onclick="LS.state.reset()">' + icon("refresh") + "Reset demo</button></div></div>" +
 
@@ -116,7 +116,7 @@
         { ic: "activity", cls: "pipe-out", t: "Machine history · insights · answers", s: "Every answer traceable to its source record" },
       ];
       host.innerHTML =
-        '<div class="page-head"><div><h1>How LogSense Works</h1>' +
+        '<div class="page-head"><div><h1>' + LS.t("how.title") + "</h1>" +
         '<p class="page-sub">From messy factory history to evidence-backed answers — in 4 weeks, without a single sensor.</p></div></div>' +
 
         '<div class="grid grid-main-side">' +
@@ -146,19 +146,20 @@
 
   LS.views.closing = {
     render(host) {
+      const t = LS.t;
       host.innerHTML =
         '<div class="closing" role="dialog" aria-label="Closing slide">' +
         '<div class="closing-inner">' +
         '<div class="brand" style="border:none;padding:0"><div class="brand-mark">' + icon("layers") + '</div>' +
         '<div><div class="brand-name">LOGSENSE</div><div class="brand-sub">MAINTENANCE INTELLIGENCE</div></div></div>' +
-        "<h1>Your Plant’s Memory,<br>Searchable.</h1>" +
+        "<h1>" + t("close.h1") + "</h1>" +
         '<div class="closing-nos">' +
-        '<span class="closing-no">No sensors</span>' +
-        '<span class="closing-no">No SAP migration</span>' +
-        '<span class="closing-no">No additional maintenance forms</span>' +
+        '<span class="closing-no">' + t("close.no1") + "</span>" +
+        '<span class="closing-no">' + t("close.no2") + "</span>" +
+        '<span class="closing-no">' + t("close.no3") + "</span>" +
         "</div>" +
-        '<p class="closing-line">Years of existing maintenance history → <strong>searchable intelligence</strong>, live in <strong>4 weeks</strong>.</p>' +
-        '<button class="btn btn-lg" style="background:#fff;border-color:#fff;color:#14293e" onclick="LS.go(\'dashboard\')">' + icon("grid") + "Back to dashboard</button>" +
+        '<p class="closing-line">' + t("close.line") + "</p>" +
+        '<button class="btn btn-lg" style="background:#fff;border-color:#fff;color:#14293e" onclick="LS.go(\'dashboard\')">' + icon("grid") + t("btn.backToDash") + "</button>" +
         "</div></div>";
     },
   };

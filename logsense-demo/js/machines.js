@@ -46,30 +46,31 @@
       "<td>" + LS.statusBadge(r.status) + "</td></tr>"
     ).join("");
     document.getElementById("machine-tbody").innerHTML =
-      body || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">No machines match these filters.</td></tr>';
-    document.getElementById("machine-count").textContent = rows.length + " of " + D().machines.length + " machines";
+      body || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">—</td></tr>';
+    document.getElementById("machine-count").textContent = rows.length + " / " + D().machines.length;
   }
 
   LS.views.machines = {
     render(host) {
+      const t = LS.t;
       host.innerHTML =
-        '<div class="page-head"><div><h1>Machine Master</h1>' +
-        '<p class="page-sub">Every machine LogSense resolved from your historical records — aliases, shorthand and all.</p></div>' +
-        '<div class="page-actions"><a class="btn" href="#/history">' + icon("clock") + "All maintenance records</a></div></div>" +
+        '<div class="page-head"><div><h1>' + t("machines.title") + "</h1>" +
+        '<p class="page-sub">' + t("machines.sub") + "</p></div>" +
+        '<div class="page-actions"><a class="btn" href="#/history">' + icon("clock") + t("nav.history") + "</a></div></div>" +
 
         '<div class="filter-bar" role="search">' +
-        '<input type="search" id="mm-q" placeholder="Search machines, IDs, aliases…" aria-label="Search machines" value="' + esc(mstate.q) + '">' +
-        '<select id="mm-line" aria-label="Filter by line"><option value="">All lines</option>' +
+        '<input type="search" id="mm-q" placeholder="' + t("machines.searchPh") + '" aria-label="Search machines" value="' + esc(mstate.q) + '">' +
+        '<select id="mm-line" aria-label="Filter by line"><option value="">' + t("machines.allLines") + "</option>" +
         D().lines.map((l) => '<option' + (mstate.line === l ? " selected" : "") + ">" + l + "</option>").join("") + "</select>" +
-        '<select id="mm-status" aria-label="Filter by status"><option value="">All statuses</option>' +
-        ["Healthy", "Attention", "Recurring"].map((s) => '<option' + (mstate.status === s ? " selected" : "") + ">" + s + "</option>").join("") + "</select>" +
+        '<select id="mm-status" aria-label="Filter by status"><option value="">' + t("machines.allStatuses") + "</option>" +
+        ["Healthy", "Attention", "Recurring"].map((s) => '<option value="' + s + '"' + (mstate.status === s ? " selected" : "") + ">" + t("status." + s) + "</option>").join("") + "</select>" +
         '<select id="mm-sort" aria-label="Sort">' +
-        '<option value="records">Sort: most records</option><option value="downtime">Sort: downtime</option>' +
-        '<option value="recent">Sort: last event</option><option value="name">Sort: name</option></select>' +
+        '<option value="records">' + t("lbl.records") + '</option><option value="downtime">' + t("lbl.downtime") + "</option>" +
+        '<option value="recent">' + t("lbl.lastEvent") + '</option><option value="name">' + t("lbl.machine") + "</option></select>" +
         '<span class="tbl-count" id="machine-count"></span></div>' +
 
         '<div class="card"><div class="table-wrap"><table class="tbl" aria-label="Machine master">' +
-        "<thead><tr><th>Machine</th><th>Line</th><th>Type</th><th class='num'>Records</th><th class='num'>Downtime (hrs)</th><th>Last event</th><th>Status</th></tr></thead>" +
+        "<thead><tr><th>" + t("lbl.machine") + "</th><th>" + t("lbl.line") + "</th><th>" + t("lbl.type") + "</th><th class='num'>" + t("lbl.records") + "</th><th class='num'>" + t("lbl.downtimeHrs") + "</th><th>" + t("lbl.lastEvent") + "</th><th>" + t("lbl.status") + "</th></tr></thead>" +
         '<tbody id="machine-tbody"></tbody></table></div></div>';
 
       document.getElementById("mm-q").addEventListener("input", (e) => { mstate.q = e.target.value; renderMachineTable(); });
@@ -92,23 +93,24 @@
   /* ---------------- Machine Detail ---------------- */
 
   function timelineItem(rec) {
+    const t = LS.t;
     const isNew = !!rec.isNew;
-    const dateLabel = D().isToday(rec.date) ? "Today" : D().fmtDate(rec.date);
+    const dateLabel = D().isToday(rec.date) ? t("lbl.today") : D().fmtDate(rec.date);
     return '<div class="tl-item ' + (rec.kind === "breakdown" ? "tl-breakdown" : "") + (isNew ? " tl-new" : "") + '">' +
       '<span class="tl-dot" aria-hidden="true"></span>' +
       '<div class="tl-date">' + dateLabel + (isNew ? " " + LS.trustBadge("NEW") : "") + "</div>" +
       '<div class="tl-card">' +
-      '<div class="tl-title">' + esc(rec.mode === "Preventive" || rec.kind !== "breakdown" ? rec.normalized : rec.mode) +
-      (rec.kind === "breakdown" ? ' <span class="badge badge-review" style="text-transform:none">Breakdown</span>' : "") + "</div>" +
+      '<div class="tl-title">' + (rec.mode === "Preventive" || rec.kind !== "breakdown" ? esc(rec.normalized) : LS.tMode(rec.mode)) +
+      (rec.kind === "breakdown" ? ' <span class="badge badge-review" style="text-transform:none">' + t("lbl.breakdown") + "</span>" : "") + "</div>" +
       '<div class="tl-raw">' + esc(rec.raw) + "</div>" +
       '<div class="tl-meta">' +
-      "<span>Action: <b>" + esc(rec.normalized) + "</b></span>" +
-      (rec.part ? "<span>Part: <b>" + esc(rec.part) + "</b></span>" : "") +
-      (rec.downtime > 0 ? "<span>Downtime: <b>" + D().fmtHrs(rec.downtime) + "</b></span>" : "") +
-      "<span>Technician: <b>" + esc(rec.tech) + "</b></span>" +
+      "<span>" + t("lbl.action") + ": <b>" + esc(rec.normalized) + "</b></span>" +
+      (rec.part ? "<span>" + t("lbl.part") + ": <b>" + esc(rec.part) + "</b></span>" : "") +
+      (rec.downtime > 0 ? "<span>" + t("lbl.downtime") + ": <b>" + D().fmtHrs(rec.downtime) + "</b></span>" : "") +
+      "<span>" + t("lbl.technician") + ": <b>" + esc(rec.tech) + "</b></span>" +
       LS.srcTag(rec) +
       "</div>" +
-      '<div class="tl-actions"><button class="btn btn-sm" onclick="LS.openRecord(' + rec.id + ')">' + icon("eye") + "View source</button></div>" +
+      '<div class="tl-actions"><button class="btn btn-sm" onclick="LS.openRecord(' + rec.id + ')">' + icon("eye") + t("btn.viewSource") + "</button></div>" +
       "</div></div>";
   }
 
@@ -123,56 +125,54 @@
       const rec = isConv ? D().bearingRecurrence() : null;
       const showRecurrenceAlert = isConv && LS.state.get("whatsappAdded");
 
-      const askQ = isConv
-        ? "Line 3 ke conveyor motor pe pichle 2 saal mein kya kya hua?"
-        : "What happened on " + m.name + " recently?";
+      const t = LS.t, tf = LS.tf;
+      const suggs = LS.i18n.suggestions();
+      const askQ = isConv ? suggs[0] : "What happened on " + m.name + " recently?";
 
       host.innerHTML =
-        '<div class="crumb"><a href="#/machines">Machines</a>' + icon("chevright", "ic-sm") + m.line + icon("chevright", "ic-sm") + esc(m.name) + "</div>" +
+        '<div class="crumb"><a href="#/machines">' + t("nav.machines") + "</a>" + icon("chevright", "ic-sm") + m.line + icon("chevright", "ic-sm") + esc(m.name) + "</div>" +
         '<div class="page-head"><div>' +
         "<h1>" + esc(m.name) + " " + LS.statusBadge(D().machineStatus(m)) + "</h1>" +
-        '<p class="page-sub">Machine ID <span class="mono">' + m.id + "</span> · " + m.line + " · " + esc(m.type) +
-        " · <b>" + st.records + " records</b> · last breakdown " + D().fmtDate(st.lastFailure) +
-        (aliases.length ? ' · aliases: <span class="mono">' + aliases.map(esc).join(", ") + "</span>" : "") + "</p></div>" +
+        '<p class="page-sub">ID <span class="mono">' + m.id + "</span> · " + m.line + " · " + esc(m.type) +
+        " · <b>" + st.records + " " + t("lbl.records") + "</b> · " + t("md.stat.lastFailure") + ": " + D().fmtDate(st.lastFailure) +
+        (aliases.length ? ' · <span class="mono">' + aliases.map(esc).join(", ") + "</span>" : "") + "</p></div>" +
         '<div class="page-actions">' +
-        '<button class="btn btn-primary" onclick="LS.askAssistant(\'' + esc(askQ).replace(/'/g, "\\'") + '\')">' + icon("chat") + "Ask AI about this machine</button>" +
-        '<button class="btn" onclick="LS.askAssistant(\'Show similar failures\')">' + icon("search") + "Find similar failures</button>" +
+        '<button class="btn btn-primary" onclick="LS.askAssistant(\'' + esc(askQ).replace(/'/g, "\\'") + '\')">' + icon("chat") + t("btn.askAi") + "</button>" +
+        '<button class="btn" onclick="LS.askAssistant(\'Show similar failures\')">' + icon("search") + t("btn.findSimilar") + "</button>" +
         "</div></div>" +
 
         (showRecurrenceAlert
           ? '<div class="banner banner-critical mb-20" role="alert">' + icon("repeat") +
-            "<div><strong>Recurrence alert — " + rec.count + "th bearing replacement in " + rec.spanMonths + " months</strong>" +
-            "Today’s record #2048 is the " + rec.count + "th bearing replacement on this motor (previous interval ~" + rec.avgDays + " days). " +
-            "Status: <b>Requires engineering review</b> — LogSense flags the pattern; it does not confirm a root cause. " +
-            '<div class="banner-actions"><button class="btn btn-sm" onclick="LS.openRecord(2048)">' + icon("eye") + "View record #2048</button>" +
-            '<a class="btn btn-sm" href="#/patterns">' + icon("activity") + "Open pattern</a></div></div></div>"
+            "<div><strong>" + tf("md.recurTitle", { n: rec.count, m: rec.spanMonths }) + "</strong>" +
+            tf("md.recurBody", { n: rec.count, d: rec.avgDays }) + " " +
+            '<div class="banner-actions"><button class="btn btn-sm" onclick="LS.openRecord(2048)">' + icon("eye") + t("btn.viewSource") + " #2048</button>" +
+            '<a class="btn btn-sm" href="#/patterns">' + icon("activity") + t("btn.allPatterns") + "</a></div></div></div>"
           : "") +
 
         '<section class="grid grid-kpi mb-20">' +
-        stat("MTTR", st.mttr + " hrs", "avg repair time (breakdowns)") +
-        stat("MTBF", st.mtbf ? st.mtbf + " hrs" : "—", "between breakdowns, observed window") +
-        stat("Breakdowns", st.breakdowns, "in record history") +
-        stat("Total downtime", st.downtime.toFixed(1) + " hrs", "sum of recorded downtime") +
-        stat("Last failure", D().fmtDate(st.lastFailure), "") +
-        stat("Repeat failures", st.repeatFailures, "events in modes seen ≥2×") +
+        stat("MTTR", st.mttr + " " + t("unit.hrs"), t("md.stat.mttrFoot")) +
+        stat("MTBF", st.mtbf ? st.mtbf + " " + t("unit.hrs") : "—", t("md.stat.mtbfFoot")) +
+        stat(t("md.stat.breakdowns"), st.breakdowns, t("md.stat.breakdownsFoot")) +
+        stat(t("md.stat.totalDt"), st.downtime.toFixed(1) + " " + t("unit.hrs"), t("md.stat.totalDtFoot")) +
+        stat(t("md.stat.lastFailure"), D().fmtDate(st.lastFailure), "") +
+        stat(t("md.stat.repeat"), st.repeatFailures, t("md.stat.repeatFoot")) +
         "</section>" +
 
         '<section class="grid grid-main-side mb-20">' +
 
-        '<div class="card"><div class="card-head"><h2>Maintenance timeline</h2><span class="card-note">' + recs.length + " records · newest first</span></div>" +
+        '<div class="card"><div class="card-head"><h2>' + t("md.timeline") + '</h2><span class="card-note">' + recs.length + " " + t("md.newestFirst") + "</span></div>" +
         '<div class="card-body"><div class="timeline">' + recs.map(timelineItem).join("") + "</div></div></div>" +
 
         '<div style="display:grid;gap:14px">' +
-        '<div class="card"><div class="card-head"><h2>Failure mode Pareto</h2><span class="card-note">' + LS.trustBadge("CALCULATED") + "</span></div>" +
+        '<div class="card"><div class="card-head"><h2>' + t("dash.paretoTitle") + '</h2><span class="card-note">' + LS.trustBadge("CALCULATED") + "</span></div>" +
         '<div class="card-body"><div class="chart-box" style="height:' + Math.max(170, pareto.length * 34 + 60) + 'px"><canvas id="ch-mpareto" role="img" aria-label="Failure mode pareto for ' + esc(m.name) + '"></canvas></div></div></div>' +
 
         (isConv && rec
-          ? '<div class="card"><div class="card-head"><h2>Detected pattern</h2>' + LS.trustBadge("HYPOTHESIS") + "</div>" +
+          ? '<div class="card"><div class="card-head"><h2>' + t("md.pattern") + "</h2>" + LS.trustBadge("HYPOTHESIS") + "</div>" +
             '<div class="card-body" style="display:grid;gap:9px">' +
-            "<p style='font-size:13.5px'><b>" + rec.count + " bearing replacements</b> between " + D().fmtDate(rec.first) + " and " + D().fmtDate(rec.last) +
-            " — average interval <b>~" + rec.avgDays + " days</b>.</p>" +
-            "<p class='small muted'>Repeated bearing replacement despite alignment checks may indicate a mounting/alignment issue. This is a hypothesis and requires engineering validation.</p>" +
-            '<div class="cite-row">' + rec.records.map((r) => '<button class="cite-chip" onclick="LS.openRecord(' + r.id + ')">' + icon("file") + "Record #" + r.id + "</button>").join("") + "</div>" +
+            "<p style='font-size:13.5px'>" + tf("md.patternBody", { n: rec.count, from: D().fmtDate(rec.first), to: D().fmtDate(rec.last), d: rec.avgDays }) + "</p>" +
+            "<p class='small muted'>" + t("ai.hypoBearing") + " " + t("ai.hypoDisclaimer") + "</p>" +
+            '<div class="cite-row">' + rec.records.map((r) => '<button class="cite-chip" onclick="LS.openRecord(' + r.id + ')">' + icon("file") + "#" + r.id + "</button>").join("") + "</div>" +
             "</div></div>"
           : "") +
         "</div></section>";
@@ -180,7 +180,7 @@
       LS.chart("ch-mpareto", {
         type: "bar",
         data: {
-          labels: pareto.map((x) => x[0]),
+          labels: pareto.map((x) => LS.tMode(x[0])),
           datasets: [{
             data: pareto.map((x) => x[1]),
             backgroundColor: "#2a78d6",
@@ -228,37 +228,38 @@
       const m = D().machineById(r.machineId);
       return '<tr class="row-link" tabindex="0" data-record="' + r.id + '">' +
         "<td class='mono small'>#" + r.id + "</td>" +
-        "<td>" + (D().isToday(r.date) ? "<b>Today</b>" : D().fmtDate(r.date)) + "</td>" +
+        "<td>" + (D().isToday(r.date) ? "<b>" + LS.t("lbl.today") + "</b>" : D().fmtDate(r.date)) + "</td>" +
         "<td><b>" + (m ? esc(m.name) : "") + "</b><br><span class='muted small'>" + (m ? m.line : "") + "</span></td>" +
-        "<td>" + esc(r.mode) + "</td>" +
+        "<td>" + LS.tMode(r.mode) + "</td>" +
         '<td class="raw-cell" title="' + esc(r.raw) + '">' + esc(r.raw) + "</td>" +
         '<td class="num">' + (r.downtime > 0 ? r.downtime.toFixed(1) : "—") + "</td>" +
         "<td>" + LS.srcTag(r) + "</td></tr>";
-    }).join("") || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">No records match. Try shorthand too — “brng”, “bearing gaya”…</td></tr>';
+    }).join("") || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">— (“brng”, “bearing gaya”…)</td></tr>';
     document.getElementById("hist-count").textContent =
-      rows.length + " records" + (rows.length > 60 ? " (showing first 60)" : "");
+      rows.length + " " + LS.t("lbl.records") + (rows.length > 60 ? " (1–60)" : "");
   }
 
   LS.views.history = {
     render(host) {
+      const t = LS.t;
       const modes = [...new Set(D().allRecords().map((r) => r.mode))].sort();
       const sources = ["maintenance_log_2026.xlsx", "maintenance_log_2025.xlsx", "SAP_PM_export.csv", "scanned_register", "WhatsApp"];
       host.innerHTML =
-        '<div class="page-head"><div><h1>Maintenance History</h1>' +
-        '<p class="page-sub">Normalized records from every source. Search understands technician shorthand and Hinglish — try <b>“bearing gaya”</b> or <b>“brng noise conveyor”</b>.</p></div></div>' +
+        '<div class="page-head"><div><h1>' + t("history.title") + "</h1>" +
+        '<p class="page-sub">' + t("history.sub") + "</p></div></div>" +
 
         '<div class="filter-bar" role="search">' +
-        '<input type="search" id="h-q" placeholder="Search records… (brng, bearing gaya, VFD, 6205ZZ)" aria-label="Search records" style="min-width:260px" value="' + esc(hstate.q) + '">' +
-        '<select id="h-machine" aria-label="Filter by machine"><option value="">All machines</option>' +
+        '<input type="search" id="h-q" placeholder="brng, bearing gaya, VFD, 6205ZZ…" aria-label="Search records" style="min-width:260px" value="' + esc(hstate.q) + '">' +
+        '<select id="h-machine" aria-label="Filter by machine"><option value="">' + t("lbl.machine") + ": —</option>" +
         D().machines.map((m) => '<option value="' + m.id + '"' + (hstate.machine === m.id ? " selected" : "") + ">" + esc(m.name) + "</option>").join("") + "</select>" +
-        '<select id="h-mode" aria-label="Filter by failure mode"><option value="">All failure modes</option>' +
-        modes.map((mo) => '<option' + (hstate.mode === mo ? " selected" : "") + ">" + mo + "</option>").join("") + "</select>" +
-        '<select id="h-source" aria-label="Filter by source"><option value="">All sources</option>' +
+        '<select id="h-mode" aria-label="Filter by failure mode"><option value="">' + t("lbl.failureMode") + ": —</option>" +
+        modes.map((mo) => '<option value="' + mo + '"' + (hstate.mode === mo ? " selected" : "") + ">" + LS.tMode(mo) + "</option>").join("") + "</select>" +
+        '<select id="h-source" aria-label="Filter by source"><option value="">' + t("lbl.source") + ": —</option>" +
         sources.map((s) => '<option value="' + s + '"' + (hstate.source === s ? " selected" : "") + ">" + s + "</option>").join("") + "</select>" +
         '<span class="tbl-count" id="hist-count"></span></div>' +
 
         '<div class="card"><div class="table-wrap"><table class="tbl" aria-label="Maintenance records">' +
-        "<thead><tr><th>ID</th><th>Date</th><th>Machine</th><th>Failure mode</th><th>Original entry</th><th class='num'>Downtime</th><th>Source</th></tr></thead>" +
+        "<thead><tr><th>ID</th><th>" + t("lbl.date") + "</th><th>" + t("lbl.machine") + "</th><th>" + t("lbl.failureMode") + "</th><th>" + t("lbl.originalEntry") + "</th><th class='num'>" + t("lbl.downtime") + "</th><th>" + t("lbl.source") + "</th></tr></thead>" +
         '<tbody id="hist-tbody"></tbody></table></div></div>';
 
       ["h-q", "h-machine", "h-mode", "h-source"].forEach((id) => {

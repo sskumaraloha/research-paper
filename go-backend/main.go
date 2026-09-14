@@ -6,10 +6,22 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"go-backend/db"
+	_ "go-backend/docs"
 	"go-backend/handlers"
 )
+
+//	@title			Products CRUD API
+//	@version		1.0
+//	@description	A simple CRUD backend built with Echo and PostgreSQL.
+
+//	@host		localhost:8080
+//	@BasePath	/api
+
+//	@tag.name			products
+//	@tag.description	Operations on products
 
 func main() {
 	e := echo.New()
@@ -29,6 +41,8 @@ func main() {
 		}
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 	})
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	ph := handlers.NewProductHandler(conn)
 	api := e.Group("/api")

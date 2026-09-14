@@ -25,3 +25,8 @@ type UpdateProductRequest struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price" validate:"gte=0"`
 }
+
+// ErrorResponse is the JSON error body returned by the API.
+type ErrorResponse struct {
+	Message string `json:"message" example:"product not found"`
+}

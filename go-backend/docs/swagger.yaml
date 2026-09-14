@@ -1,0 +1,201 @@
+basePath: /api
+definitions:
+  models.CreateProductRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+    required:
+    - name
+    type: object
+  models.ErrorResponse:
+    properties:
+      message:
+        example: product not found
+        type: string
+    type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.UpdateProductRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+    required:
+    - name
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A simple CRUD backend built with Echo and PostgreSQL.
+  title: Products CRUD API
+  version: "1.0"
+paths:
+  /products:
+    get:
+      description: Returns all products ordered by id.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: List products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product and returns it.
+      parameters:
+      - description: Product to create
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      description: Deletes a product by id.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a product
+      tags:
+      - products
+    get:
+      description: Returns a single product by id.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get a product
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product and returns it.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated product
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update a product
+      tags:
+      - products
+swagger: "2.0"
+tags:
+- description: Operations on products
+  name: products

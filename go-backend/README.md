@@ -1,7 +1,8 @@
 # Go Echo + PostgreSQL CRUD API
 
 A simple CRUD backend built with [Echo](https://echo.labstack.com/) and PostgreSQL.
-It manages a `products` resource with create, read, update, and delete endpoints.
+It manages a `products` resource with create, read, update, and delete endpoints,
+documented with Swagger (OpenAPI).
 
 ## Project structure
 
@@ -11,6 +12,7 @@ go-backend/
 ├── db/db.go                 # PostgreSQL connection (pgx driver)
 ├── handlers/                # HTTP handlers (CRUD logic)
 ├── models/                  # Data models and request payloads
+├── docs/                    # Generated Swagger/OpenAPI spec (swag init)
 ├── migrations/              # SQL schema (auto-applied by docker-compose)
 ├── docker-compose.yml       # Local PostgreSQL
 └── .env.example             # Environment variable reference
@@ -38,11 +40,29 @@ go-backend/
    The server listens on `http://localhost:8080` by default. Configuration is
    read from environment variables — see `.env.example`.
 
+## API documentation (Swagger)
+
+With the server running, open the interactive Swagger UI at:
+
+- **http://localhost:8080/swagger/index.html**
+
+The raw OpenAPI spec is served at `/swagger/doc.json` and also checked in under
+`docs/` (`swagger.json`, `swagger.yaml`).
+
+The docs are generated from annotations with [swag](https://github.com/swaggo/swag).
+After changing handler annotations, regenerate them:
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+swag init --parseDependency --parseInternal
+```
+
 ## API endpoints
 
 | Method | Path                | Description        |
 |--------|---------------------|--------------------|
 | GET    | `/health`           | Health check       |
+| GET    | `/swagger/*`        | Swagger UI & spec  |
 | POST   | `/api/products`     | Create a product   |
 | GET    | `/api/products`     | List all products  |
 | GET    | `/api/products/:id` | Get one product    |

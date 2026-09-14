@@ -23,6 +23,17 @@ func NewProductHandler(db *sql.DB) *ProductHandler {
 }
 
 // Create handles POST /api/products.
+//
+//	@Summary		Create a product
+//	@Description	Creates a new product and returns it.
+//	@Tags			products
+//	@Accept			json
+//	@Produce		json
+//	@Param			product	body		models.CreateProductRequest	true	"Product to create"
+//	@Success		201		{object}	models.Product
+//	@Failure		400		{object}	models.ErrorResponse
+//	@Failure		500		{object}	models.ErrorResponse
+//	@Router			/products [post]
 func (h *ProductHandler) Create(c echo.Context) error {
 	var req models.CreateProductRequest
 	if err := c.Bind(&req); err != nil {
@@ -47,6 +58,14 @@ func (h *ProductHandler) Create(c echo.Context) error {
 }
 
 // List handles GET /api/products.
+//
+//	@Summary		List products
+//	@Description	Returns all products ordered by id.
+//	@Tags			products
+//	@Produce		json
+//	@Success		200	{array}		models.Product
+//	@Failure		500	{object}	models.ErrorResponse
+//	@Router			/products [get]
 func (h *ProductHandler) List(c echo.Context) error {
 	rows, err := h.DB.QueryContext(c.Request().Context(),
 		`SELECT id, name, description, price, created_at, updated_at
@@ -72,6 +91,17 @@ func (h *ProductHandler) List(c echo.Context) error {
 }
 
 // Get handles GET /api/products/:id.
+//
+//	@Summary		Get a product
+//	@Description	Returns a single product by id.
+//	@Tags			products
+//	@Produce		json
+//	@Param			id	path		int	true	"Product ID"
+//	@Success		200	{object}	models.Product
+//	@Failure		400	{object}	models.ErrorResponse
+//	@Failure		404	{object}	models.ErrorResponse
+//	@Failure		500	{object}	models.ErrorResponse
+//	@Router			/products/{id} [get]
 func (h *ProductHandler) Get(c echo.Context) error {
 	id, err := parseID(c)
 	if err != nil {
@@ -94,6 +124,19 @@ func (h *ProductHandler) Get(c echo.Context) error {
 }
 
 // Update handles PUT /api/products/:id.
+//
+//	@Summary		Update a product
+//	@Description	Updates an existing product and returns it.
+//	@Tags			products
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int							true	"Product ID"
+//	@Param			product	body		models.UpdateProductRequest	true	"Updated product"
+//	@Success		200		{object}	models.Product
+//	@Failure		400		{object}	models.ErrorResponse
+//	@Failure		404		{object}	models.ErrorResponse
+//	@Failure		500		{object}	models.ErrorResponse
+//	@Router			/products/{id} [put]
 func (h *ProductHandler) Update(c echo.Context) error {
 	id, err := parseID(c)
 	if err != nil {
@@ -127,6 +170,16 @@ func (h *ProductHandler) Update(c echo.Context) error {
 }
 
 // Delete handles DELETE /api/products/:id.
+//
+//	@Summary		Delete a product
+//	@Description	Deletes a product by id.
+//	@Tags			products
+//	@Param			id	path	int	true	"Product ID"
+//	@Success		204	"No Content"
+//	@Failure		400	{object}	models.ErrorResponse
+//	@Failure		404	{object}	models.ErrorResponse
+//	@Failure		500	{object}	models.ErrorResponse
+//	@Router			/products/{id} [delete]
 func (h *ProductHandler) Delete(c echo.Context) error {
 	id, err := parseID(c)
 	if err != nil {

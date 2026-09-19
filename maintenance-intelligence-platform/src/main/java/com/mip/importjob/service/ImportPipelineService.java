@@ -285,6 +285,11 @@ public class ImportPipelineService {
     }
 
     private ImportJobStep startStep(ImportJob job, ImportStepName name, int orderIndex) {
+        // honours the time limiter: an interrupted run aborts at the next step boundary,
+        // rolling the whole pipeline back so markFailed records a clean FAILED state
+        if (Thread.currentThread().isInterrupted()) {
+            throw new FileProcessingException("Import aborted: time budget exceeded");
+        }
         ImportJobStep step = new ImportJobStep(job, name, orderIndex);
         step.setStatus(ImportJobStep.StepStatus.RUNNING);
         step.setStartedAt(Instant.now());

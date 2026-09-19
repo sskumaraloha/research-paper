@@ -17,6 +17,10 @@ spring:
       max-file-size: 10MB
       max-request-size: 12MB
 
+  mvc:
+    async:
+      request-timeout: 30s
+
 app:
   jwt:
     # secret is profile-specific
@@ -41,6 +45,19 @@ app:
     expiry-minutes: 30
     max-requests-per-hour: 3
 
+  rate-limit:
+    enabled: true
+    # general API budget per user (or IP before login)
+    general-limit: 120
+    general-window-seconds: 60
+    # strict per-IP budget for credential endpoints and the webhook
+    auth-limit: 10
+    auth-window-seconds: 60
+
+  time-limit:
+    # hard budget for one import-pipeline run
+    import-seconds: 120
+
   import:
     # rows scoring at/above the plant's auto-approve threshold are imported directly;
     # below the plant's low-confidence threshold they are rejected outright;
@@ -50,6 +67,8 @@ app:
 
 server:
   port: 8080
+  tomcat:
+    connection-timeout: 20s
   error:
     include-message: always
     include-stacktrace: never

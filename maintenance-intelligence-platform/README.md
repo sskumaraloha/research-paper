@@ -97,6 +97,21 @@ Roles form a hierarchy (`PLATFORM_ADMIN > ADMIN > ENGINEER > VIEWER`): the platf
 owner passes every check a customer admin does, while customer admins can never reach
 `/api/platform/**`.
 
+## Endpoint protection
+
+- **Rate limiter** (in the security chain, after JWT auth): credential endpoints
+  (`login`, `register`, `refresh`, `demo-login`, `forgot/reset-password`) and the
+  WhatsApp webhook share a strict **per-IP** token bucket (default 10/min); all other
+  `/api/**` traffic gets a general **per-user** budget (default 120/min, falling back
+  to IP before login). Exceeding a budget returns `429` with a `Retry-After` header.
+  Buckets are in-memory (single instance) and idle ones are purged; tune or disable
+  via `app.rate-limit.*`.
+- **Time limiter**: the import pipeline runs under a hard budget
+  (`app.time-limit.import-seconds`, default 120 s) on a bounded worker pool — on
+  timeout the worker is interrupted (the pipeline aborts at the next step boundary and
+  rolls back), the job is marked FAILED and the caller gets `503`. Server-level
+  guards: Tomcat `connection-timeout: 20s` and `spring.mvc.async.request-timeout: 30s`.
+
 ## Platform owner console
 
 For the person who runs the software: sign into **`/admin.html`** as a
@@ -156,7 +171,7 @@ per-user conversation (pass `conversationId` to continue one);
 
 ## Testing
 
-`mvn test` runs 39 integration tests (H2, real Spring context, real security filters):
+`mvn test` runs 43 integration tests (H2, real Spring context, real security filters):
 auth/token lifecycle, plant scoping and role enforcement, admin user management and
 deactivation semantics, plant-settings guardrails, machine CRUD with plant
 consistency, the import pipeline end-to-end (routing, validation queue, alias

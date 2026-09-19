@@ -1,7 +1,10 @@
 package com.mip.importjob.service;
 
 import com.mip.audit.service.AuditService;
+import com.mip.common.timelimit.TimeLimitProperties;
+import com.mip.common.timelimit.TimeLimitedExecutor;
 import com.mip.exception.BusinessRuleViolationException;
+import com.mip.exception.OperationTimeoutException;
 import com.mip.exception.DuplicateResourceException;
 import com.mip.exception.FileProcessingException;
 import com.mip.exception.InvalidRequestException;
@@ -51,7 +54,9 @@ public class ImportService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final AuditService auditService;
+    private final TimeLimitedExecutor timeLimitedExecutor;
     private final ImportProperties importProperties;
+    private final TimeLimitProperties timeLimitProperties;
 
     /**
      * Stores the file, records the source document and job, then runs the pipeline.
@@ -132,9 +137,16 @@ public class ImportService {
         job.setFinishedAt(null);
     }
 
+    /** The pipeline runs under a hard time budget so one huge file cannot pin the API. */
     private void runPipeline(Long jobId) {
         try {
-            pipelineService.execute(jobId);
+            timeLimitedExecutor.call(() -> {
+                pipelineService.execute(jobId);
+                return null;
+            }, java.time.Duration.ofSeconds(timeLimitProperties.importSeconds()), "import pipeline");
+        } catch (OperationTimeoutException ex) {
+            pipelineService.markFailed(jobId, ex.getMessage());
+            throw ex;
         } catch (RuntimeException ex) {
             log.error("Import job {} failed", jobId, ex);
             pipelineService.markFailed(jobId, ex.getMessage());

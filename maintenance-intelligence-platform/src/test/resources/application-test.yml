@@ -23,6 +23,15 @@ app:
     url: http://localhost:8080/reset-password.html
     expiry-minutes: 30
     max-requests-per-hour: 3
+  rate-limit:
+    # kept off for the functional suites; ProtectionTest enables it explicitly
+    enabled: false
+    general-limit: 120
+    general-window-seconds: 60
+    auth-limit: 10
+    auth-window-seconds: 60
+  time-limit:
+    import-seconds: 120
   import:
     storage-dir: ${java.io.tmpdir}/mip-test-imports
 

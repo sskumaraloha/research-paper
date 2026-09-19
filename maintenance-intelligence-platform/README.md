@@ -147,3 +147,9 @@ learning and dismissal, duplicate rejection), record lifecycle and validation ru
 analytics/KPI math, all plant-level detectors, assistant intent routing and persisted
 conversations, synonym search, multi-turn entry-agent conversations, and the WhatsApp
 webhook end-to-end including token and sender rejection.
+
+## Future improvements
+
+- Work orders with assignment/approval workflow (schedules currently complete directly)
+- File/photo attachments on maintenance records
+- SSO / 2FA; Flyway migrations before multi-environment releases

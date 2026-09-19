@@ -33,7 +33,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/demo-login").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/demo-login",
+                                "/api/auth/register", "/api/auth/forgot-password",
+                                "/api/auth/reset-password", "/api/auth/reset-password/validate").permitAll()
+                        .requestMatchers("/reset-password.html", "/favicon.ico").permitAll()
                         // authenticated by a shared secret header inside the controller
                         .requestMatchers("/api/webhooks/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()

@@ -66,7 +66,7 @@ Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /api/auth/login`, `/demo-login`, `/refresh`, `/logout`, `GET /api/auth/me` |
+| Auth | `POST /api/auth/register`, `/login`, `/demo-login`, `/refresh`, `/logout`, `/forgot-password`, `/reset-password`, `GET /api/auth/reset-password/validate`, `GET /api/auth/me` |
 | Users | `GET /api/users`, `POST /api/users`, `PUT /{id}`, `POST /{id}/deactivate` (all admin), `GET /api/users/roles` |
 | Plants | `GET /api/plants`, `GET/PUT /{id}/settings` (PUT admin), `GET /{id}/lines` |
 | Config | `GET /api/config/failure-modes`, `/dictionary` |
@@ -97,6 +97,19 @@ phone number, the message drives the same entry agent as the web channel (a conf
 word saves an awaiting draft), and the response's `reply` field is the text the
 gateway should send back.
 
+## Registration & password reset
+
+`POST /api/auth/register` self-registers an account (default role VIEWER, no plants —
+an admin promotes and assigns) and returns tokens immediately.
+`POST /api/auth/forgot-password` emails a single-use, 30-minute reset link (the reply
+never reveals whether the email exists; 3 requests per account per hour). The link
+opens the bundled **`/reset-password.html`** page, which validates the token and lets
+the user set a new password via `POST /api/auth/reset-password` — consuming the token
+and revoking all refresh tokens. Email delivery uses SMTP when `spring.mail.host` is
+set; otherwise emails (including the link) are printed to the console so the flow
+works in development. Configure the emailed link's base URL with
+`PASSWORD_RESET_URL` and the sender with `MAIL_FROM`.
+
 ## Assistant conversations
 
 Every `POST /api/assistant/ask` records the question and the flattened answer in a
@@ -106,7 +119,7 @@ per-user conversation (pass `conversationId` to continue one);
 
 ## Testing
 
-`mvn test` runs 30 integration tests (H2, real Spring context, real security filters):
+`mvn test` runs 33 integration tests (H2, real Spring context, real security filters):
 auth/token lifecycle, plant scoping and role enforcement, admin user management and
 deactivation semantics, plant-settings guardrails, machine CRUD with plant
 consistency, the import pipeline end-to-end (routing, validation queue, alias

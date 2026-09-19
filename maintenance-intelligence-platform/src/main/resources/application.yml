@@ -32,6 +32,15 @@ app:
     # shared secret a WhatsApp gateway must send in X-Webhook-Token; blank disables the webhook
     webhook-token: ${WHATSAPP_WEBHOOK_TOKEN:}
 
+  mail:
+    from: ${MAIL_FROM:no-reply@mip.local}
+
+  password-reset:
+    # the emailed link opens this page with ?token=... appended
+    url: ${PASSWORD_RESET_URL:http://localhost:8080/reset-password.html}
+    expiry-minutes: 30
+    max-requests-per-hour: 3
+
   import:
     # rows scoring at/above the plant's auto-approve threshold are imported directly;
     # below the plant's low-confidence threshold they are rejected outright;

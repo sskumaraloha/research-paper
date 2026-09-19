@@ -19,6 +19,10 @@ app:
     enabled: true
   whatsapp:
     webhook-token: test-webhook-token
+  password-reset:
+    url: http://localhost:8080/reset-password.html
+    expiry-minutes: 30
+    max-requests-per-hour: 3
   import:
     storage-dir: ${java.io.tmpdir}/mip-test-imports
 

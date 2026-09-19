@@ -73,8 +73,13 @@ public class AliasSuggestionService {
 
         int revalidated = 0;
         for (ValidationItem item : validationItemRepository
-                .findPendingWithUnresolvedMachineText(plantId, suggestion.getRawText())) {
+                .findPendingWithUnresolvedMachine(plantId)) {
             StagedRow row = item.getStagedRow();
+            // machineText is the raw file value; the suggestion stores the normalised form
+            if (!com.mip.common.util.TextNormalizer.normalize(row.getMachineText())
+                    .equals(suggestion.getRawText())) {
+                continue;
+            }
             row.setMachine(machine);
             row.setMachineConfidence(0.95);
             row.setResolutionMethod("ALIAS");

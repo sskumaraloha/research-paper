@@ -44,3 +44,6 @@ Thumbs.db
 
 # Local file storage (uploaded images)
 uploads/
+
+# MIP import file storage
+import-files/

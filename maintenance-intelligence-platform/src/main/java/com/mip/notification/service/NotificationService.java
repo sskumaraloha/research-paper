@@ -3,6 +3,7 @@ package com.mip.notification.service;
 import com.mip.common.dto.PageResponse;
 import com.mip.exception.ResourceNotFoundException;
 import com.mip.importjob.entity.ImportJob;
+import com.mip.importjob.repository.ImportJobRepository;
 import com.mip.insight.repository.InsightRepository;
 import com.mip.notification.dto.BadgeCountsResponse;
 import com.mip.notification.dto.NotificationResponse;
@@ -34,6 +35,7 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final ValidationItemRepository validationItemRepository;
     private final InsightRepository insightRepository;
+    private final ImportJobRepository importJobRepository;
     private final PlantService plantService;
 
     // --- user-facing reads ---
@@ -76,9 +78,11 @@ public class NotificationService {
 
     // --- event hooks called by other modules ---
 
+    /** Takes the id and re-loads inside this transaction: callers hold a detached job. */
     @Transactional
-    public void onValidationPending(ImportJob job) {
-        if (job.getNeedsValidationCount() == 0) {
+    public void onValidationPending(Long jobId) {
+        ImportJob job = importJobRepository.findById(jobId).orElse(null);
+        if (job == null || job.getNeedsValidationCount() == 0) {
             return;
         }
         notifyPlantStaff(job.getPlant(), null, Notification.NotificationType.VALIDATION_PENDING,

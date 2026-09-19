@@ -22,8 +22,7 @@ public interface ValidationItemRepository extends JpaRepository<ValidationItem, 
     @Query("""
             select v from ValidationItem v
             where v.plant.id = :plantId and v.status = 'PENDING'
-              and v.stagedRow.machine is null and v.stagedRow.machineText = :machineText
+              and v.stagedRow.machine is null and v.stagedRow.machineText is not null
             """)
-    List<ValidationItem> findPendingWithUnresolvedMachineText(@Param("plantId") Long plantId,
-                                                              @Param("machineText") String machineText);
+    List<ValidationItem> findPendingWithUnresolvedMachine(@Param("plantId") Long plantId);
 }

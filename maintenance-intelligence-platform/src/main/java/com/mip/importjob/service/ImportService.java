@@ -58,8 +58,8 @@ public class ImportService {
     public ImportSummaryResponse uploadFile(Long plantId, MultipartFile file, MipUserDetails principal) {
         Long jobId = createJob(plantId, file, principal);
         runPipeline(jobId);
+        notificationService.onValidationPending(jobId);
         ImportJob job = jobRepository.findById(jobId).orElseThrow();
-        notificationService.onValidationPending(job);
         return new ImportSummaryResponse(job.getId(), job.getStatus().name(), job.getTotalRows(),
                 job.getAutoImportedCount(), job.getNeedsValidationCount(),
                 job.getRejectedCount(), job.getInvalidCount());
@@ -109,7 +109,7 @@ public class ImportService {
     public ImportJobResponse rerunJob(Long jobId, MipUserDetails principal) {
         prepareRerun(jobId, principal);
         runPipeline(jobId);
-        jobRepository.findById(jobId).ifPresent(notificationService::onValidationPending);
+        notificationService.onValidationPending(jobId);
         return getJob(jobId, principal);
     }
 

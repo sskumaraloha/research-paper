@@ -1,5 +1,6 @@
 package com.mip.user.service;
 
+import com.mip.audit.service.AuditService;
 import com.mip.exception.BusinessRuleViolationException;
 import com.mip.exception.DuplicateResourceException;
 import com.mip.exception.InvalidRequestException;
@@ -49,6 +50,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final EmailService emailService;
+    private final AuditService auditService;
     private final DemoProperties demoProperties;
     private final PasswordResetProperties passwordResetProperties;
 
@@ -72,6 +74,8 @@ public class AuthService {
             user.setPhoneNumber(phone);
         }
         User saved = userRepository.save(user);
+        auditService.log(saved.getId(), saved.getFullName(), "USER_REGISTERED", "USER",
+                saved.getId(), null, saved.getEmail());
         log.info("User {} self-registered", saved.getId());
         return issueTokens(saved);
     }
@@ -106,6 +110,8 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         resetToken.setUsed(true);
         refreshTokenRepository.revokeAllForUser(user.getId());
+        auditService.log(user.getId(), user.getFullName(), "PASSWORD_RESET", "USER",
+                user.getId(), null, "via emailed reset link");
         log.info("Password reset completed for user {}", user.getId());
         return new SimpleMessageResponse("Password updated. You can now log in with your new password");
     }

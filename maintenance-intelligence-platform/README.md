@@ -14,7 +14,9 @@ plant             Plants, production lines, per-plant pipeline thresholds, plant
 dictionary        Failure modes (keyword-driven) and search synonyms
 machine           Machines, normalised aliases, tiered machine resolver, alias suggestions
 part              Spare parts with usage stats and replacement intervals
-record            Maintenance records, source documents, timelines, filters
+record            Maintenance records, source documents, timelines, filters, CSV export
+schedule          Preventive-maintenance plans: due/overdue tracking, completion, daily sweep
+audit             Immutable trail of security- and data-relevant actions (admin-readable)
 importjob         Import jobs, per-step progress, staged rows, the pipeline itself
 validation        Human validation queue (approve / edit-approve / reject), alias mapping
 analytics         Machine stats, pareto, trends, line share, plant KPIs
@@ -71,7 +73,9 @@ Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
 | Plants | `GET /api/plants`, `GET/PUT /{id}/settings` (PUT admin), `GET /{id}/lines` |
 | Config | `GET /api/config/failure-modes`, `/dictionary` |
 | Machines | `GET/POST /api/machines`, `GET/PUT /{id}`, `GET /{id}/timeline`, `/{id}/stats`, `/{id}/insights`, `POST /{id}/insights/recompute`, `GET/POST /{id}/aliases` |
-| Records | `GET/POST /api/records`, `GET /{id}`, `POST /{id}/reject`, `GET /filter-options`, `/source-documents` |
+| Records | `GET/POST /api/records`, `GET /{id}`, `POST /{id}/reject`, `GET /filter-options`, `/source-documents`, `GET /export` (CSV) |
+| Schedules | `GET/POST /api/schedules`, `GET /due`, `PUT /{id}`, `POST /{id}/complete` |
+| Audit | `GET /api/audit` (admin; filter by plant/action) |
 | Imports | `POST /api/imports/upload`, `GET /latest`, `/{id}`, `POST /{id}/rerun` |
 | Validation | `GET /api/validation/queue`, `/pending-count`, `POST /{id}/approve`, `/{id}/edit-approve`, `/{id}/reject`, alias suggestions `GET /alias-suggestions`, `POST /alias-suggestions/{id}/map`, `/alias-suggestions/{id}/dismiss` |
 | Dashboard | `GET /api/dashboard/kpis` |
@@ -110,6 +114,22 @@ set; otherwise emails (including the link) are printed to the console so the flo
 works in development. Configure the emailed link's base URL with
 `PASSWORD_RESET_URL` and the sender with `MAIL_FROM`.
 
+## Preventive maintenance
+
+Recurring plans per machine (`intervalDays` + next due date). `GET /api/schedules/due`
+lists what is overdue or due within 7 days; completing a schedule writes a
+`PREVENTIVE` maintenance record (with optional planned downtime) and rolls the next
+due date forward. A daily 06:00 sweep notifies plant staff about overdue plans, at
+most once per schedule per day.
+
+## Audit trail
+
+User creation/updates/deactivation, registrations, password resets, plant-settings
+changes, machine create/update, record rejections, validation decisions, import
+uploads and schedule activity are written to an immutable audit log (actor snapshot,
+action, entity, plant, detail), queryable by admins at `GET /api/audit`. Entries share
+the action's transaction, so the trail never records something that rolled back.
+
 ## Assistant conversations
 
 Every `POST /api/assistant/ask` records the question and the flattened answer in a
@@ -119,7 +139,7 @@ per-user conversation (pass `conversationId` to continue one);
 
 ## Testing
 
-`mvn test` runs 33 integration tests (H2, real Spring context, real security filters):
+`mvn test` runs 36 integration tests (H2, real Spring context, real security filters):
 auth/token lifecycle, plant scoping and role enforcement, admin user management and
 deactivation semantics, plant-settings guardrails, machine CRUD with plant
 consistency, the import pipeline end-to-end (routing, validation queue, alias

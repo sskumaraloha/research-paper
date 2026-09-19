@@ -1,5 +1,6 @@
 package com.mip.user.service;
 
+import com.mip.audit.service.AuditService;
 import com.mip.common.entity.BaseEntity;
 import com.mip.exception.BusinessRuleViolationException;
 import com.mip.exception.DuplicateResourceException;
@@ -14,6 +15,7 @@ import com.mip.user.dto.UserProfileResponse;
 import com.mip.user.dto.UserSummaryResponse;
 import com.mip.user.entity.RoleName;
 import com.mip.user.entity.User;
+import com.mip.security.MipUserDetails;
 import com.mip.user.repository.RefreshTokenRepository;
 import com.mip.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class UserService {
     private final PlantRepository plantRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getProfile(Long userId) {
@@ -58,7 +61,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserSummaryResponse createUser(CreateUserRequest request) {
+    public UserSummaryResponse createUser(CreateUserRequest request, MipUserDetails principal) {
         if (userRepository.existsByEmailIgnoreCase(request.email())) {
             throw new DuplicateResourceException("A user with this email already exists");
         }
@@ -69,12 +72,15 @@ public class UserService {
             user.getPlants().addAll(resolvePlants(request.plantIds()));
         }
         User saved = userRepository.save(user);
+        auditService.log(principal, "USER_CREATED", "USER", saved.getId(), null,
+                saved.getEmail() + " as " + saved.getRole());
         log.info("User {} created with role {}", saved.getId(), saved.getRole());
         return toSummary(saved);
     }
 
     @Transactional
-    public UserSummaryResponse updateUser(Long userId, UpdateUserRequest request) {
+    public UserSummaryResponse updateUser(Long userId, UpdateUserRequest request,
+                                          MipUserDetails principal) {
         User user = getUser(userId);
         if (request.fullName() != null && !request.fullName().isBlank()) {
             user.setFullName(request.fullName().trim());
@@ -95,19 +101,21 @@ public class UserService {
                 refreshTokenRepository.revokeAllForUser(user.getId());
             }
         }
+        auditService.log(principal, "USER_UPDATED", "USER", user.getId(), null, user.getEmail());
         return toSummary(user);
     }
 
     /** Deactivation revokes every outstanding refresh token; access dies within token TTL. */
     @Transactional
-    public UserSummaryResponse deactivateUser(Long userId, Long actingUserId) {
-        if (userId.equals(actingUserId)) {
+    public UserSummaryResponse deactivateUser(Long userId, MipUserDetails principal) {
+        if (userId.equals(principal.getId())) {
             throw new BusinessRuleViolationException("You cannot deactivate your own account");
         }
         User user = getUser(userId);
         user.setActive(false);
         refreshTokenRepository.revokeAllForUser(user.getId());
-        log.info("User {} deactivated by user {}", userId, actingUserId);
+        auditService.log(principal, "USER_DEACTIVATED", "USER", user.getId(), null, user.getEmail());
+        log.info("User {} deactivated by user {}", userId, principal.getId());
         return toSummary(user);
     }
 

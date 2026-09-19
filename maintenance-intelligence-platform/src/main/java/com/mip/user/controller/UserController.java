@@ -43,21 +43,23 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    public UserSummaryResponse createUser(@Valid @RequestBody CreateUserRequest request) {
-        return userService.createUser(request);
+    public UserSummaryResponse createUser(@Valid @RequestBody CreateUserRequest request,
+                                          @AuthenticationPrincipal MipUserDetails principal) {
+        return userService.createUser(request, principal);
     }
 
     @PutMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public UserSummaryResponse updateUser(@PathVariable Long userId,
-                                          @Valid @RequestBody UpdateUserRequest request) {
-        return userService.updateUser(userId, request);
+                                          @Valid @RequestBody UpdateUserRequest request,
+                                          @AuthenticationPrincipal MipUserDetails principal) {
+        return userService.updateUser(userId, request, principal);
     }
 
     @PostMapping("/{userId}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public UserSummaryResponse deactivateUser(@PathVariable Long userId,
                                               @AuthenticationPrincipal MipUserDetails principal) {
-        return userService.deactivateUser(userId, principal.getId());
+        return userService.deactivateUser(userId, principal);
     }
 }

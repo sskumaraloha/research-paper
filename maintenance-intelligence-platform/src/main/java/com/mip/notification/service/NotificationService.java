@@ -104,6 +104,15 @@ public class NotificationService {
     }
 
     @Transactional
+    public void onMaintenanceOverdue(com.mip.schedule.entity.MaintenanceSchedule schedule) {
+        notifyPlantStaff(schedule.getPlant(), null, Notification.NotificationType.MAINTENANCE_DUE,
+                "Preventive maintenance overdue",
+                "'" + schedule.getTitle() + "' on " + schedule.getMachine().getName()
+                        + " was due on " + schedule.getNextDueOn() + ".",
+                "SCHEDULE", schedule.getId());
+    }
+
+    @Transactional
     public void onRecordCreated(MaintenanceRecord record) {
         Long creatorId = record.getCreatedBy() == null ? null : record.getCreatedBy().getId();
         notifyPlantStaff(record.getPlant(), creatorId, Notification.NotificationType.RECORD_CREATED,

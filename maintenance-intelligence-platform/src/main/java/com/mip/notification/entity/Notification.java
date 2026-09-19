@@ -24,7 +24,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Notification extends BaseEntity {
 
-    public enum NotificationType {VALIDATION_PENDING, INSIGHT, RECORD_CREATED}
+    public enum NotificationType {VALIDATION_PENDING, INSIGHT, RECORD_CREATED, MAINTENANCE_DUE}
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

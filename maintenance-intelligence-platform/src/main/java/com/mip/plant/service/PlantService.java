@@ -1,5 +1,6 @@
 package com.mip.plant.service;
 
+import com.mip.audit.service.AuditService;
 import com.mip.exception.ResourceNotFoundException;
 import com.mip.exception.ValidationException;
 import com.mip.plant.dto.LineResponse;
@@ -28,6 +29,7 @@ public class PlantService {
     private final PlantRepository plantRepository;
     private final ProductionLineRepository lineRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public List<PlantSummaryResponse> listPlantsForUser(MipUserDetails principal) {
@@ -50,6 +52,9 @@ public class PlantService {
         plant.setAutoApproveThreshold(request.autoApproveThreshold());
         plant.setLowConfidenceThreshold(request.lowConfidenceThreshold());
         plant.setDowntimeAlertMinutes(request.downtimeAlertMinutes());
+        auditService.log(principal, "PLANT_SETTINGS_UPDATED", "PLANT", plant.getId(), plant.getId(),
+                "auto=" + request.autoApproveThreshold() + " low=" + request.lowConfidenceThreshold()
+                        + " alertMin=" + request.downtimeAlertMinutes());
         return new PlantSettingsResponse(plant.getId(), plant.getName(),
                 plant.getAutoApproveThreshold(), plant.getLowConfidenceThreshold(),
                 plant.getDowntimeAlertMinutes());

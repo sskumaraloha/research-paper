@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +50,25 @@ public class MaintenanceRecordController {
             @AuthenticationPrincipal MipUserDetails principal) {
         return recordService.listRecords(plantId, machineId, lineId, failureModeId, from, to,
                 text, page, size, principal);
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<String> exportRecords(
+            @RequestParam Long plantId,
+            @RequestParam(required = false) Long machineId,
+            @RequestParam(required = false) Long lineId,
+            @RequestParam(required = false) Long failureModeId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String text,
+            @AuthenticationPrincipal MipUserDetails principal) {
+        String csv = recordService.exportCsv(plantId, machineId, lineId, failureModeId, from, to,
+                text, principal);
+        return ResponseEntity.ok()
+                .header("Content-Disposition",
+                        "attachment; filename=maintenance-records-plant-" + plantId + ".csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csv);
     }
 
     @GetMapping("/filter-options")

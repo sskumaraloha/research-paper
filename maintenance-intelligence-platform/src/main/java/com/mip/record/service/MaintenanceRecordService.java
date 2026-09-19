@@ -2,15 +2,18 @@ package com.mip.record.service;
 
 import com.mip.common.dto.NamedRef;
 import com.mip.common.dto.PageResponse;
+import com.mip.audit.service.AuditService;
 import com.mip.dictionary.entity.FailureMode;
 import com.mip.dictionary.repository.FailureModeRepository;
 import com.mip.dictionary.service.FailureModeService;
+import com.mip.exception.InternalServerErrorException;
 import com.mip.exception.InvalidRequestException;
 import com.mip.exception.InvalidStateTransitionException;
 import com.mip.exception.ResourceNotFoundException;
 import com.mip.machine.entity.Machine;
 import com.mip.machine.repository.MachineRepository;
 import com.mip.notification.service.NotificationService;
+import com.mip.part.entity.SparePart;
 import com.mip.part.service.SparePartService;
 import com.mip.plant.repository.ProductionLineRepository;
 import com.mip.plant.service.PlantService;
@@ -31,15 +34,20 @@ import com.mip.user.entity.User;
 import com.mip.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +64,7 @@ public class MaintenanceRecordService {
     private final PlantService plantService;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final AuditService auditService;
     private final RecordMapper recordMapper;
 
     @Transactional(readOnly = true)
@@ -77,6 +86,46 @@ public class MaintenanceRecordService {
     @Transactional(readOnly = true)
     public RecordDetailResponse getRecord(Long recordId, MipUserDetails principal) {
         return recordMapper.toDetail(requireAccessibleRecord(recordId, principal));
+    }
+
+    /** CSV of the filtered records (same filters as the listing), capped at 10,000 rows. */
+    @Transactional(readOnly = true)
+    public String exportCsv(Long plantId, Long machineId, Long lineId, Long failureModeId,
+                            LocalDate from, LocalDate to, String text, MipUserDetails principal) {
+        plantService.requireAccessiblePlant(plantId, principal);
+        String textFilter = (text == null || text.isBlank()) ? null : text.trim();
+        var records = recordRepository.search(plantId, RecordStatus.ACTIVE, machineId, lineId,
+                failureModeId, from, to, textFilter,
+                PageRequest.of(0, 10_000, Sort.by(Sort.Direction.DESC, "recordDate", "id")));
+        try (StringWriter out = new StringWriter();
+             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.builder()
+                     .setHeader("id", "date", "machineCode", "machineName", "line", "failureMode",
+                             "downtimeMinutes", "technician", "source", "confidence",
+                             "description", "actionTaken", "spareParts")
+                     .build())) {
+            for (MaintenanceRecord record : records) {
+                printer.printRecord(
+                        record.getId(), record.getRecordDate(),
+                        record.getMachine().getCode(), record.getMachine().getName(),
+                        record.getMachine().getLine() == null ? ""
+                                : record.getMachine().getLine().getName(),
+                        record.getFailureMode() == null ? "" : record.getFailureMode().getName(),
+                        record.getDowntimeMinutes(), nullToEmpty(record.getTechnician()),
+                        record.getSource().name(),
+                        record.getConfidence() == null ? "" : record.getConfidence(),
+                        record.getDescription(), nullToEmpty(record.getActionTaken()),
+                        record.getSpareParts().stream().map(SparePart::getName).sorted()
+                                .collect(Collectors.joining("; ")));
+            }
+            printer.flush();
+            return out.toString();
+        } catch (IOException ex) {
+            throw new InternalServerErrorException("CSV export failed: " + ex.getMessage());
+        }
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +152,26 @@ public class MaintenanceRecordService {
         log.info("Manual record {} created on machine {} by user {}", saved.getId(),
                 machine.getCode(), creator.getId());
         return recordMapper.toDetail(saved);
+    }
+
+    /** Record creation from a completed preventive-maintenance schedule. */
+    @Transactional
+    public MaintenanceRecord createPreventiveRecord(Machine machine, java.time.LocalDate performedOn,
+                                                    int downtimeMinutes, String description,
+                                                    String actionTaken, String technician, User creator) {
+        MaintenanceRecord record = new MaintenanceRecord();
+        record.setPlant(machine.getPlant());
+        record.setMachine(machine);
+        record.setRecordDate(performedOn);
+        record.setDowntimeMinutes(downtimeMinutes);
+        record.setDescription(description);
+        record.setActionTaken(trimOrNull(actionTaken));
+        record.setTechnician(trimOrNull(technician));
+        record.setSource(RecordSource.PREVENTIVE);
+        record.setCreatedBy(creator);
+        MaintenanceRecord saved = recordRepository.save(record);
+        log.info("Preventive record {} created on machine {}", saved.getId(), machine.getCode());
+        return saved;
     }
 
     /** Record creation on behalf of the entry agent; the conversation already checked plant access. */
@@ -151,6 +220,8 @@ public class MaintenanceRecordService {
         }
         record.setStatus(RecordStatus.REJECTED);
         record.setRejectedReason(request.reason().trim());
+        auditService.log(principal, "RECORD_REJECTED", "RECORD", record.getId(),
+                record.getPlant().getId(), request.reason());
         log.info("Record {} rejected by user {}: {}", recordId, principal.getId(), request.reason());
         return recordMapper.toDetail(record);
     }

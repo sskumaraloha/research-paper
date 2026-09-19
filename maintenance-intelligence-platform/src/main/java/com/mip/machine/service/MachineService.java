@@ -1,5 +1,6 @@
 package com.mip.machine.service;
 
+import com.mip.audit.service.AuditService;
 import com.mip.common.dto.PageResponse;
 import com.mip.exception.DuplicateResourceException;
 import com.mip.exception.InvalidRequestException;
@@ -49,6 +50,7 @@ public class MachineService {
     private final ProductionLineRepository lineRepository;
     private final MachineAliasService machineAliasService;
     private final PlantService plantService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public PageResponse<MachineRowResponse> listMachines(Long plantId, String query, Long lineId,
@@ -104,6 +106,8 @@ public class MachineService {
         machine.setModel(trimOrNull(request.model()));
         machine.setCommissionedOn(request.commissionedOn());
         Machine saved = machineRepository.save(machine);
+        auditService.log(principal, "MACHINE_CREATED", "MACHINE", saved.getId(), plant.getId(),
+                saved.getCode() + " - " + saved.getName());
         return getMachineDetail(saved.getId(), principal);
     }
 
@@ -132,6 +136,8 @@ public class MachineService {
         if (request.active() != null) {
             machine.setActive(request.active());
         }
+        auditService.log(principal, "MACHINE_UPDATED", "MACHINE", machine.getId(),
+                machine.getPlant().getId(), machine.getCode());
         return getMachineDetail(machineId, principal);
     }
 

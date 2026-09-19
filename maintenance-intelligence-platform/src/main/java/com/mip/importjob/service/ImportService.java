@@ -1,5 +1,6 @@
 package com.mip.importjob.service;
 
+import com.mip.audit.service.AuditService;
 import com.mip.exception.BusinessRuleViolationException;
 import com.mip.exception.DuplicateResourceException;
 import com.mip.exception.FileProcessingException;
@@ -49,6 +50,7 @@ public class ImportService {
     private final PlantService plantService;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final AuditService auditService;
     private final ImportProperties importProperties;
 
     /**
@@ -84,6 +86,8 @@ public class ImportService {
                 file.getContentType() == null ? "application/octet-stream" : file.getContentType(),
                 content.length, checksum, storedPath.toString(), uploader));
         ImportJob job = jobRepository.save(new ImportJob(plant, document, uploader));
+        auditService.log(principal, "IMPORT_UPLOADED", "IMPORT_JOB", job.getId(), plant.getId(),
+                document.getFilename());
         log.info("Import job {} created for {} by user {}", job.getId(), document.getFilename(),
                 uploader.getId());
         return job.getId();

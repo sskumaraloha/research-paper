@@ -2,6 +2,7 @@ package com.mip.validation.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mip.audit.service.AuditService;
 import com.mip.common.dto.PageResponse;
 import com.mip.dictionary.repository.FailureModeRepository;
 import com.mip.exception.BusinessRuleViolationException;
@@ -52,6 +53,7 @@ public class ValidationService {
     private final ImportPipelineService pipelineService;
     private final PlantService plantService;
     private final UserService userService;
+    private final AuditService auditService;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -91,6 +93,8 @@ public class ValidationService {
         item.setDecidedAt(Instant.now());
         item.setDecisionNote(request.reason().trim());
         item.getStagedRow().setStatus(StagedRowStatus.REJECTED_BY_VALIDATOR);
+        auditService.log(principal, "VALIDATION_REJECTED", "VALIDATION_ITEM", item.getId(),
+                item.getPlant().getId(), request.reason());
         log.info("Validation item {} rejected by user {}", itemId, principal.getId());
         return new ValidationDecisionResponse(item.getId(), item.getStatus().name(), null);
     }
@@ -112,6 +116,8 @@ public class ValidationService {
         item.setDecidedBy(userService.getUser(principal.getId()));
         item.setDecidedAt(Instant.now());
         item.setResultingRecord(record);
+        auditService.log(principal, "VALIDATION_APPROVED", "VALIDATION_ITEM", item.getId(),
+                item.getPlant().getId(), "record " + record.getId());
         log.info("Validation item {} approved by user {}: record {}", item.getId(),
                 principal.getId(), record.getId());
         return record;

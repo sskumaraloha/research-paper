@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: Maintenance Intelligence Platform
+
+  profiles:
+    active: dev
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+app:
+  jwt:
+    # secret is profile-specific
+    access-token-minutes: 30
+    refresh-token-days: 7
+
+  demo:
+    # allows POST /api/auth/demo-login for the seeded demo engineer
+    enabled: false
+    email: demo@mip.local
+
+  import:
+    # rows scoring at/above the plant's auto-approve threshold are imported directly;
+    # below the plant's low-confidence threshold they are rejected outright;
+    # in between they land in the validation queue
+    max-file-size-mb: 10
+    storage-dir: import-files
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-stacktrace: never

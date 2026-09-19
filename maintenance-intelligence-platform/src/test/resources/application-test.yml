@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:mip_test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: dGVzdC1vbmx5LXNlY3JldC1rZXktZm9yLW1pcC10ZXN0LXByb2ZpbGUtMDEyMzQ1Njc4OQ==
+    access-token-minutes: 30
+    refresh-token-days: 7
+  demo:
+    enabled: true
+  import:
+    storage-dir: ${java.io.tmpdir}/mip-test-imports
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false

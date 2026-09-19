@@ -56,7 +56,23 @@ public class MachineResolverService {
             }
         }
 
-        return fuzzyMatch(machines, plantId, needle);
+        return fuzzyMatch(machines, plantId, needle, FUZZY_FLOOR);
+    }
+
+    /**
+     * Best candidate even below the resolution threshold, for alias suggestions.
+     * Still requires minimal similarity so pure noise yields no suggestion.
+     */
+    @Transactional(readOnly = true)
+    public Optional<MachineResolution> suggest(Long plantId, String rawText) {
+        if (rawText == null || rawText.isBlank()) {
+            return Optional.empty();
+        }
+        String needle = TextNormalizer.normalize(rawText);
+        if (needle.isEmpty()) {
+            return Optional.empty();
+        }
+        return fuzzyMatch(machineRepository.findByPlantIdAndActiveTrue(plantId), plantId, needle, 0.4);
     }
 
     private Optional<MachineResolution> matchDirect(List<Machine> machines, Long plantId,
@@ -82,7 +98,8 @@ public class MachineResolverService {
                         MachineResolution.ResolutionMethod.ALIAS));
     }
 
-    private Optional<MachineResolution> fuzzyMatch(List<Machine> machines, Long plantId, String needle) {
+    private Optional<MachineResolution> fuzzyMatch(List<Machine> machines, Long plantId, String needle,
+                                                   double floor) {
         Machine best = null;
         double bestSimilarity = 0;
         for (Machine machine : machines) {
@@ -101,11 +118,11 @@ public class MachineResolverService {
                 bestSimilarity = similarity;
             }
         }
-        if (best == null || bestSimilarity < FUZZY_FLOOR) {
+        if (best == null || bestSimilarity < floor) {
             return Optional.empty();
         }
         // map similarity [floor,1] onto confidence [0.5,0.9]
-        double confidence = 0.5 + 0.4 * (bestSimilarity - FUZZY_FLOOR) / (1 - FUZZY_FLOOR);
+        double confidence = 0.5 + 0.4 * (bestSimilarity - floor) / (1 - floor);
         return Optional.of(new MachineResolution(best, confidence,
                 MachineResolution.ResolutionMethod.FUZZY));
     }

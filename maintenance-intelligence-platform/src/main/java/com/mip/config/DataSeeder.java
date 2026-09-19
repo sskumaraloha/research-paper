@@ -152,6 +152,8 @@ public class DataSeeder implements CommandLineRunner {
                 new SparePart("FLT-AIR", "Air Filter Element", "Pneumatics"),
                 new SparePart("GRS-EP2", "Grease EP2 Cartridge", "Lubrication")));
 
+        User owner = new User("Priya Owner", "owner@mip.local",
+                passwordEncoder.encode("Owner@123"), RoleName.PLATFORM_ADMIN);
         User admin = new User("Asha Admin", "admin@mip.local",
                 passwordEncoder.encode("Admin@123"), RoleName.ADMIN);
         admin.setPhoneNumber("919999999999");
@@ -163,7 +165,7 @@ public class DataSeeder implements CommandLineRunner {
         User viewer = new User("Vikram Viewer", "viewer@mip.local",
                 passwordEncoder.encode("Viewer@123"), RoleName.VIEWER);
         viewer.getPlants().add(pune);
-        userRepository.saveAll(List.of(admin, demo, viewer));
+        userRepository.saveAll(List.of(owner, admin, demo, viewer));
 
         seedHistory(List.of(cnc1, cnc2, press, convA, weld, packer, wrapper), failureModes, demo);
     }

@@ -18,6 +18,10 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
 
     List<Machine> findByPlantIdAndActiveTrue(Long plantId);
 
+    long countByPlantId(Long plantId);
+
+    long countByPlantIdIn(List<Long> plantIds);
+
     @Query("""
             select m from Machine m
             where m.plant.id = :plantId

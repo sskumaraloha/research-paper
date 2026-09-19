@@ -19,6 +19,8 @@ public interface ValidationItemRepository extends JpaRepository<ValidationItem, 
 
     long countByPlantIdAndStatus(Long plantId, ValidationItem.ValidationStatus status);
 
+    long countByStatus(ValidationItem.ValidationStatus status);
+
     @Query("""
             select v from ValidationItem v
             where v.plant.id = :plantId and v.status = 'PENDING'

@@ -3,6 +3,10 @@ package com.mip.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +31,23 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /** The platform owner outranks customer admins; admins outrank engineers and viewers. */
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy("""
+                ROLE_PLATFORM_ADMIN > ROLE_ADMIN
+                ROLE_ADMIN > ROLE_ENGINEER
+                ROLE_ENGINEER > ROLE_VIEWER
+                """);
+    }
+
+    @Bean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+        return handler;
+    }
+
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
@@ -36,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/demo-login",
                                 "/api/auth/register", "/api/auth/forgot-password",
                                 "/api/auth/reset-password", "/api/auth/reset-password/validate").permitAll()
-                        .requestMatchers("/reset-password.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/reset-password.html", "/admin.html", "/favicon.ico").permitAll()
                         // authenticated by a shared secret header inside the controller
                         .requestMatchers("/api/webhooks/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()

@@ -25,6 +25,13 @@ public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRe
 
     long countByPlantIdAndStatus(Long plantId, RecordStatus status);
 
+    long countByPlantIdInAndStatus(List<Long> plantIds, RecordStatus status);
+
+    long countByStatusAndRecordDateGreaterThanEqual(RecordStatus status, LocalDate from);
+
+    @Query("select max(r.createdAt) from MaintenanceRecord r where r.plant.id in :plantIds")
+    java.time.Instant lastActivityForPlants(@Param("plantIds") List<Long> plantIds);
+
     @Query("""
             select r from MaintenanceRecord r
             where r.plant.id = :plantId

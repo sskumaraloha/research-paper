@@ -9,7 +9,8 @@ insights, search and a data-backed assistant**.
 ## Modules
 
 ```
-user / security   JWT auth (access + rotating hashed refresh tokens), roles ADMIN/ENGINEER/VIEWER
+user / security   JWT auth (access + rotating hashed refresh tokens), roles PLATFORM_ADMIN/ADMIN/ENGINEER/VIEWER
+platform          Software-owner console: cross-organisation usage, drill-down, /admin.html panel
 plant             Plants, production lines, per-plant pipeline thresholds, plant-scoped access
 dictionary        Failure modes (keyword-driven) and search synonyms
 machine           Machines, normalised aliases, tiered machine resolver, alias suggestions
@@ -59,7 +60,8 @@ export DB_USERNAME=... DB_PASSWORD=... JWT_SECRET=<base64 256-bit key>
 java -jar target/maintenance-intelligence-platform-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
-Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
+Dev seed users (dev profile only): `owner@mip.local`/`Owner@123` (PLATFORM_ADMIN —
+signs into the `/admin.html` console), `admin@mip.local`/`Admin@123` (ADMIN),
 `demo@mip.local`/`Demo@123` (ENGINEER, used by `POST /api/auth/demo-login`),
 `viewer@mip.local`/`Viewer@123` (VIEWER). Swagger UI (dev only):
 `http://localhost:8080/swagger-ui.html`.
@@ -76,6 +78,7 @@ Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
 | Records | `GET/POST /api/records`, `GET /{id}`, `POST /{id}/reject`, `GET /filter-options`, `/source-documents`, `GET /export` (CSV) |
 | Schedules | `GET/POST /api/schedules`, `GET /due`, `PUT /{id}`, `POST /{id}/complete` |
 | Audit | `GET /api/audit` (admin; filter by plant/action) |
+| Platform | `GET /api/platform/overview`, `/organisations`, `/organisations/{id}` (PLATFORM_ADMIN); console UI at `/admin.html` |
 | Imports | `POST /api/imports/upload`, `GET /latest`, `/{id}`, `POST /{id}/rerun` |
 | Validation | `GET /api/validation/queue`, `/pending-count`, `POST /{id}/approve`, `/{id}/edit-approve`, `/{id}/reject`, alias suggestions `GET /alias-suggestions`, `POST /alias-suggestions/{id}/map`, `/alias-suggestions/{id}/dismiss` |
 | Dashboard | `GET /api/dashboard/kpis` |
@@ -90,6 +93,20 @@ Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
 
 Mutating endpoints require `ADMIN` or `ENGINEER`; `VIEWER` is read-only; user and plant
 settings management is admin-only. All plant-scoped reads verify plant membership.
+Roles form a hierarchy (`PLATFORM_ADMIN > ADMIN > ENGINEER > VIEWER`): the platform
+owner passes every check a customer admin does, while customer admins can never reach
+`/api/platform/**`.
+
+## Platform owner console
+
+For the person who runs the software: sign into **`/admin.html`** as a
+`PLATFORM_ADMIN` to watch what is going on across subscriber organisations —
+platform-wide totals (organisations, plants, users, machines, records, imports,
+pending validation), a per-organisation usage table (plants, users, machines, records,
+imports, last activity) with drill-down into each organisation's plants and people,
+the recent activity feed from the audit trail, and the full user list. The panel is a
+single served page calling the JWT-secured `/api/platform/**` endpoints; non-owner
+accounts are refused at both the API and the page's sign-in.
 
 ## WhatsApp inbound channel
 
@@ -139,7 +156,7 @@ per-user conversation (pass `conversationId` to continue one);
 
 ## Testing
 
-`mvn test` runs 36 integration tests (H2, real Spring context, real security filters):
+`mvn test` runs 39 integration tests (H2, real Spring context, real security filters):
 auth/token lifecycle, plant scoping and role enforcement, admin user management and
 deactivation semantics, plant-settings guardrails, machine CRUD with plant
 consistency, the import pipeline end-to-end (routing, validation queue, alias

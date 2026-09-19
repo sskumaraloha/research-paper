@@ -107,6 +107,7 @@ public class PlantService {
     }
 
     private boolean isAdmin(MipUserDetails principal) {
-        return RoleName.ADMIN.name().equals(principal.getRole());
+        return RoleName.ADMIN.name().equals(principal.getRole())
+                || RoleName.PLATFORM_ADMIN.name().equals(principal.getRole());
     }
 }

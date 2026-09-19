@@ -86,4 +86,11 @@ public class ValidationController {
                                          @AuthenticationPrincipal MipUserDetails principal) {
         return aliasSuggestionService.mapAlias(suggestionId, request, principal);
     }
+
+    @PostMapping("/alias-suggestions/{suggestionId}/dismiss")
+    @PreAuthorize("hasAnyRole('ADMIN','ENGINEER')")
+    public AliasSuggestionResponse dismissAlias(@PathVariable Long suggestionId,
+                                                @AuthenticationPrincipal MipUserDetails principal) {
+        return aliasSuggestionService.dismiss(suggestionId, principal);
+    }
 }

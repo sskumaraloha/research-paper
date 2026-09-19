@@ -28,6 +28,10 @@ app:
     enabled: false
     email: demo@mip.local
 
+  whatsapp:
+    # shared secret a WhatsApp gateway must send in X-Webhook-Token; blank disables the webhook
+    webhook-token: ${WHATSAPP_WEBHOOK_TOKEN:}
+
   import:
     # rows scoring at/above the plant's auto-approve threshold are imported directly;
     # below the plant's low-confidence threshold they are rejected outright;

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 
 public record AskRequest(
         @NotNull Long plantId,
-        @NotBlank @Size(max = 500) String question
+        @NotBlank @Size(max = 500) String question,
+        /** Continue an earlier conversation; omitted starts a new one. */
+        Long conversationId
 ) {
 }

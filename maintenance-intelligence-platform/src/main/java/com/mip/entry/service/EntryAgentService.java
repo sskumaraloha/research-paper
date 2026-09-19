@@ -5,12 +5,16 @@ import com.mip.entry.dto.EntryDraftResponse;
 import com.mip.entry.dto.EntryMessageRequest;
 import com.mip.entry.dto.EntryMessageResponse;
 import com.mip.entry.dto.StartConversationRequest;
+import com.mip.entry.dto.WhatsAppReplyResponse;
 import com.mip.entry.entity.EntryConversation;
 import com.mip.entry.entity.EntryMessage;
 import com.mip.entry.repository.EntryConversationRepository;
 import com.mip.entry.repository.EntryMessageRepository;
+import com.mip.exception.BusinessRuleViolationException;
+import com.mip.exception.ForbiddenException;
 import com.mip.exception.InvalidStateTransitionException;
 import com.mip.exception.ResourceNotFoundException;
+import com.mip.exception.UnauthorizedException;
 import com.mip.part.entity.SparePart;
 import com.mip.plant.entity.Plant;
 import com.mip.plant.service.PlantService;
@@ -18,7 +22,9 @@ import com.mip.record.dto.CreateRecordRequest;
 import com.mip.record.entity.MaintenanceRecord;
 import com.mip.record.service.MaintenanceRecordService;
 import com.mip.security.MipUserDetails;
+import com.mip.user.entity.RoleName;
 import com.mip.user.entity.User;
+import com.mip.user.repository.UserRepository;
 import com.mip.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * The guided record-entry agent: each user message is mined for fields, the draft is
@@ -40,12 +49,15 @@ import java.util.List;
 @Slf4j
 public class EntryAgentService {
 
+    private static final Set<String> CONFIRM_WORDS = Set.of("confirm", "yes", "y", "ok", "save", "done");
+
     private final EntryConversationRepository conversationRepository;
     private final EntryMessageRepository messageRepository;
     private final EntryExtractionService extractionService;
     private final MaintenanceRecordService recordService;
     private final PlantService plantService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Transactional
     public EntryConversationResponse startConversation(StartConversationRequest request,
@@ -121,6 +133,57 @@ public class EntryAgentService {
     @Transactional(readOnly = true)
     public EntryConversationResponse getConversation(Long conversationId, MipUserDetails principal) {
         return toResponse(requireOwnConversation(conversationId, principal));
+    }
+
+    /**
+     * Inbound WhatsApp message relayed by a gateway. The sender is identified by phone
+     * number; the message continues their open WhatsApp conversation (a confirm word
+     * saves an awaiting draft) or starts a new one on their first assigned plant.
+     */
+    @Transactional
+    public WhatsAppReplyResponse handleWhatsAppInbound(String from, String text) {
+        User user = userRepository.findByPhoneNumber(from.trim())
+                .filter(User::isActive)
+                .orElseThrow(() -> new UnauthorizedException("Unknown sender"));
+        if (user.getRole() == RoleName.VIEWER) {
+            throw new ForbiddenException("This account cannot log maintenance records");
+        }
+        MipUserDetails principal = new MipUserDetails(user);
+        EntryConversation open = conversationRepository
+                .findTopByUserIdAndChannelOrderByIdDesc(user.getId(),
+                        EntryConversation.Channel.WHATSAPP)
+                .filter(c -> c.getStatus() == EntryConversation.ConversationStatus.COLLECTING
+                        || c.getStatus() == EntryConversation.ConversationStatus.AWAITING_CONFIRMATION)
+                .orElse(null);
+
+        EntryConversationResponse response;
+        if (open != null
+                && open.getStatus() == EntryConversation.ConversationStatus.AWAITING_CONFIRMATION
+                && CONFIRM_WORDS.contains(text.trim().toLowerCase(Locale.ROOT))) {
+            response = confirm(open.getId(), principal);
+        } else if (open != null) {
+            response = handleMessage(open.getId(), new EntryMessageRequest(text), principal);
+        } else {
+            Plant plant = user.getPlants().stream()
+                    .min(Comparator.comparing(Plant::getId))
+                    .orElseThrow(() -> new BusinessRuleViolationException(
+                            "No plant is assigned to this account"));
+            EntryConversation conversation = conversationRepository.save(
+                    new EntryConversation(user, plant, EntryConversation.Channel.WHATSAPP));
+            processUserMessage(conversation, text);
+            response = toResponse(conversation);
+        }
+        return new WhatsAppReplyResponse(response.id(), response.status(),
+                lastAssistantMessage(response));
+    }
+
+    private String lastAssistantMessage(EntryConversationResponse response) {
+        for (int i = response.messages().size() - 1; i >= 0; i--) {
+            if ("ASSISTANT".equals(response.messages().get(i).sender())) {
+                return response.messages().get(i).content();
+            }
+        }
+        return "Message received.";
     }
 
     // --- internals ---

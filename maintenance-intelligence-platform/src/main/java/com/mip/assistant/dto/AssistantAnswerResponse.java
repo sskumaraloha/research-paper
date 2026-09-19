@@ -10,6 +10,17 @@ public record AssistantAnswerResponse(
         List<StatTile> tiles,
         List<AnswerSection> sections,
         List<RecordRowResponse> records,
-        List<String> followUps
+        List<String> followUps,
+        Long conversationId
 ) {
+    /** Builders create answers without a conversation; the service attaches it. */
+    public AssistantAnswerResponse(String intent, String title, List<StatTile> tiles,
+                                   List<AnswerSection> sections, List<RecordRowResponse> records,
+                                   List<String> followUps) {
+        this(intent, title, tiles, sections, records, followUps, null);
+    }
+
+    public AssistantAnswerResponse withConversationId(Long id) {
+        return new AssistantAnswerResponse(intent, title, tiles, sections, records, followUps, id);
+    }
 }

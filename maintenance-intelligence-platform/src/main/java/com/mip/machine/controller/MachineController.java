@@ -7,8 +7,10 @@ import com.mip.insight.dto.InsightResponse;
 import com.mip.insight.service.InsightService;
 import com.mip.machine.dto.AddAliasRequest;
 import com.mip.machine.dto.AliasResponse;
+import com.mip.machine.dto.CreateMachineRequest;
 import com.mip.machine.dto.MachineDetailResponse;
 import com.mip.machine.dto.MachineRowResponse;
+import com.mip.machine.dto.UpdateMachineRequest;
 import com.mip.machine.entity.Machine;
 import com.mip.machine.service.MachineAliasService;
 import com.mip.machine.service.MachineService;
@@ -24,6 +26,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,6 +62,22 @@ public class MachineController {
     public MachineDetailResponse getMachine(@PathVariable Long machineId,
                                             @AuthenticationPrincipal MipUserDetails principal) {
         return machineService.getMachineDetail(machineId, principal);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN','ENGINEER')")
+    public MachineDetailResponse createMachine(@Valid @RequestBody CreateMachineRequest request,
+                                               @AuthenticationPrincipal MipUserDetails principal) {
+        return machineService.createMachine(request, principal);
+    }
+
+    @PutMapping("/{machineId}")
+    @PreAuthorize("hasAnyRole('ADMIN','ENGINEER')")
+    public MachineDetailResponse updateMachine(@PathVariable Long machineId,
+                                               @Valid @RequestBody UpdateMachineRequest request,
+                                               @AuthenticationPrincipal MipUserDetails principal) {
+        return machineService.updateMachine(machineId, request, principal);
     }
 
     @GetMapping("/{machineId}/timeline")

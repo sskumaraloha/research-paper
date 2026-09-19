@@ -3,6 +3,9 @@ package com.mip.plant.entity;
 import com.mip.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +26,10 @@ public class Plant extends BaseEntity {
 
     @Column(length = 100)
     private String location;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organisation_id")
+    private Organisation organisation;
 
     // --- plant settings (import pipeline and alerting thresholds) ---
 

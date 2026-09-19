@@ -1,15 +1,21 @@
 package com.mip.machine.service;
 
 import com.mip.common.dto.PageResponse;
+import com.mip.exception.DuplicateResourceException;
 import com.mip.exception.InvalidRequestException;
 import com.mip.exception.ResourceNotFoundException;
 import com.mip.machine.dto.AliasResponse;
+import com.mip.machine.dto.CreateMachineRequest;
 import com.mip.machine.dto.MachineDetailResponse;
 import com.mip.machine.dto.MachineRowResponse;
+import com.mip.machine.dto.UpdateMachineRequest;
 import com.mip.machine.entity.Criticality;
 import com.mip.machine.entity.Machine;
 import com.mip.machine.entity.MachineStatus;
 import com.mip.machine.repository.MachineRepository;
+import com.mip.plant.entity.Plant;
+import com.mip.plant.entity.ProductionLine;
+import com.mip.plant.repository.ProductionLineRepository;
 import com.mip.plant.service.PlantService;
 import com.mip.record.entity.MaintenanceRecord;
 import com.mip.record.entity.RecordStatus;
@@ -40,6 +46,7 @@ public class MachineService {
 
     private final MachineRepository machineRepository;
     private final MaintenanceRecordRepository recordRepository;
+    private final ProductionLineRepository lineRepository;
     private final MachineAliasService machineAliasService;
     private final PlantService plantService;
 
@@ -79,6 +86,53 @@ public class MachineService {
                 activity == null ? 0 : activity.getTotalDowntimeMinutes(),
                 activity == null ? null : activity.getLastRecordDate(),
                 aliases);
+    }
+
+    @Transactional
+    public MachineDetailResponse createMachine(CreateMachineRequest request, MipUserDetails principal) {
+        Plant plant = plantService.requireAccessiblePlant(request.plantId(), principal);
+        String code = request.code().trim();
+        if (machineRepository.findByPlantIdAndCodeIgnoreCase(plant.getId(), code).isPresent()) {
+            throw new DuplicateResourceException(
+                    "Machine code '" + code + "' already exists in this plant");
+        }
+        Machine machine = new Machine(plant, resolveLine(plant.getId(), request.lineId()), code,
+                request.name().trim(),
+                request.criticality() == null ? Criticality.MEDIUM
+                        : requireCriticality(request.criticality()));
+        machine.setManufacturer(trimOrNull(request.manufacturer()));
+        machine.setModel(trimOrNull(request.model()));
+        machine.setCommissionedOn(request.commissionedOn());
+        Machine saved = machineRepository.save(machine);
+        return getMachineDetail(saved.getId(), principal);
+    }
+
+    @Transactional
+    public MachineDetailResponse updateMachine(Long machineId, UpdateMachineRequest request,
+                                               MipUserDetails principal) {
+        Machine machine = requireAccessibleMachine(machineId, principal);
+        if (request.name() != null && !request.name().isBlank()) {
+            machine.setName(request.name().trim());
+        }
+        if (request.lineId() != null) {
+            machine.setLine(resolveLine(machine.getPlant().getId(), request.lineId()));
+        }
+        if (request.manufacturer() != null) {
+            machine.setManufacturer(trimOrNull(request.manufacturer()));
+        }
+        if (request.model() != null) {
+            machine.setModel(trimOrNull(request.model()));
+        }
+        if (request.criticality() != null) {
+            machine.setCriticality(requireCriticality(request.criticality()));
+        }
+        if (request.commissionedOn() != null) {
+            machine.setCommissionedOn(request.commissionedOn());
+        }
+        if (request.active() != null) {
+            machine.setActive(request.active());
+        }
+        return getMachineDetail(machineId, principal);
     }
 
     /**
@@ -130,10 +184,27 @@ public class MachineService {
         if (value == null || value.isBlank()) {
             return null;
         }
+        return requireCriticality(value);
+    }
+
+    private Criticality requireCriticality(String value) {
         try {
             return Criticality.valueOf(value.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
             throw new InvalidRequestException("Unknown criticality: " + value);
         }
+    }
+
+    private ProductionLine resolveLine(Long plantId, Long lineId) {
+        if (lineId == null) {
+            return null;
+        }
+        return lineRepository.findById(lineId)
+                .filter(line -> line.getPlant().getId().equals(plantId))
+                .orElseThrow(() -> new ResourceNotFoundException("Production line", lineId));
+    }
+
+    private String trimOrNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }

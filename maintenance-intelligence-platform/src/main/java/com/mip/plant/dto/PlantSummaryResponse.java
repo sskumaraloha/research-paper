@@ -4,6 +4,7 @@ public record PlantSummaryResponse(
         Long id,
         String code,
         String name,
-        String location
+        String location,
+        String organisationName
 ) {
 }

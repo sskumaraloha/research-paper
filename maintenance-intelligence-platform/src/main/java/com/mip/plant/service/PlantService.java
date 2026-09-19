@@ -1,9 +1,11 @@
 package com.mip.plant.service;
 
 import com.mip.exception.ResourceNotFoundException;
+import com.mip.exception.ValidationException;
 import com.mip.plant.dto.LineResponse;
 import com.mip.plant.dto.PlantSettingsResponse;
 import com.mip.plant.dto.PlantSummaryResponse;
+import com.mip.plant.dto.UpdatePlantSettingsRequest;
 import com.mip.plant.entity.Plant;
 import com.mip.plant.repository.PlantRepository;
 import com.mip.plant.repository.ProductionLineRepository;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +33,26 @@ public class PlantService {
     public List<PlantSummaryResponse> listPlantsForUser(MipUserDetails principal) {
         return accessiblePlants(principal).stream()
                 .sorted(Comparator.comparing(Plant::getName))
-                .map(p -> new PlantSummaryResponse(p.getId(), p.getCode(), p.getName(), p.getLocation()))
+                .map(p -> new PlantSummaryResponse(p.getId(), p.getCode(), p.getName(), p.getLocation(),
+                        p.getOrganisation() == null ? null : p.getOrganisation().getName()))
                 .toList();
+    }
+
+    /** Threshold changes; the caller enforces the ADMIN role. */
+    @Transactional
+    public PlantSettingsResponse updatePlantSettings(Long plantId, UpdatePlantSettingsRequest request,
+                                                     MipUserDetails principal) {
+        Plant plant = requireAccessiblePlant(plantId, principal);
+        if (request.lowConfidenceThreshold() >= request.autoApproveThreshold()) {
+            throw new ValidationException("Invalid thresholds", Map.of("lowConfidenceThreshold",
+                    "must be below autoApproveThreshold"));
+        }
+        plant.setAutoApproveThreshold(request.autoApproveThreshold());
+        plant.setLowConfidenceThreshold(request.lowConfidenceThreshold());
+        plant.setDowntimeAlertMinutes(request.downtimeAlertMinutes());
+        return new PlantSettingsResponse(plant.getId(), plant.getName(),
+                plant.getAutoApproveThreshold(), plant.getLowConfidenceThreshold(),
+                plant.getDowntimeAlertMinutes());
     }
 
     @Transactional(readOnly = true)

@@ -33,6 +33,8 @@ public class EntryConversation extends BaseEntity {
 
     public enum ConversationStatus {COLLECTING, AWAITING_CONFIRMATION, CONFIRMED, CANCELLED}
 
+    public enum Channel {WEB, WHATSAPP}
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -44,6 +46,10 @@ public class EntryConversation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 25)
     private ConversationStatus status = ConversationStatus.COLLECTING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Channel channel = Channel.WEB;
 
     // --- draft record fields ---
 
@@ -78,5 +84,10 @@ public class EntryConversation extends BaseEntity {
     public EntryConversation(User user, Plant plant) {
         this.user = user;
         this.plant = plant;
+    }
+
+    public EntryConversation(User user, Plant plant, Channel channel) {
+        this(user, plant);
+        this.channel = channel;
     }
 }

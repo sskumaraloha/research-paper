@@ -67,39 +67,50 @@ Dev seed users (dev profile only): `admin@mip.local`/`Admin@123` (ADMIN),
 | Area | Endpoints |
 |---|---|
 | Auth | `POST /api/auth/login`, `/demo-login`, `/refresh`, `/logout`, `GET /api/auth/me` |
-| Users | `GET /api/users` (admin), `GET /api/users/roles` |
-| Plants | `GET /api/plants`, `/{id}/settings`, `/{id}/lines` |
+| Users | `GET /api/users`, `POST /api/users`, `PUT /{id}`, `POST /{id}/deactivate` (all admin), `GET /api/users/roles` |
+| Plants | `GET /api/plants`, `GET/PUT /{id}/settings` (PUT admin), `GET /{id}/lines` |
 | Config | `GET /api/config/failure-modes`, `/dictionary` |
-| Machines | `GET /api/machines`, `/{id}`, `/{id}/timeline`, `/{id}/stats`, `/{id}/insights`, `POST /{id}/insights/recompute`, `GET/POST /{id}/aliases` |
+| Machines | `GET/POST /api/machines`, `GET/PUT /{id}`, `GET /{id}/timeline`, `/{id}/stats`, `/{id}/insights`, `POST /{id}/insights/recompute`, `GET/POST /{id}/aliases` |
 | Records | `GET/POST /api/records`, `GET /{id}`, `POST /{id}/reject`, `GET /filter-options`, `/source-documents` |
 | Imports | `POST /api/imports/upload`, `GET /latest`, `/{id}`, `POST /{id}/rerun` |
-| Validation | `GET /api/validation/queue`, `/pending-count`, `POST /{id}/approve`, `/{id}/edit-approve`, `/{id}/reject`, alias suggestions `GET /alias-suggestions`, `POST /alias-suggestions/{id}/map` |
+| Validation | `GET /api/validation/queue`, `/pending-count`, `POST /{id}/approve`, `/{id}/edit-approve`, `/{id}/reject`, alias suggestions `GET /alias-suggestions`, `POST /alias-suggestions/{id}/map`, `/alias-suggestions/{id}/dismiss` |
 | Dashboard | `GET /api/dashboard/kpis` |
 | Analytics | `GET /api/analytics/pareto`, `/top-downtime-machines`, `/failure-mode-stats`, `/line-downtime-share`, `/part-replacement-intervals`, `/downtime-trend` |
 | Insights | `GET /api/insights`, `/count`, `POST /recompute` |
 | Parts | `GET /api/parts`, `/{id}` |
 | Search | `GET /api/search`, `/records`, `/machines` |
-| Assistant | `POST /api/assistant/ask`, `GET /api/assistant/suggestions` |
+| Assistant | `POST /api/assistant/ask`, `GET /api/assistant/suggestions`, `GET /api/assistant/conversations[/{id}]` |
 | Entry agent | `POST /api/entry/conversations`, `GET /{id}`, `POST /{id}/messages`, `/{id}/confirm`, `/{id}/request-edit` |
+| WhatsApp | `POST /api/webhooks/whatsapp` (gateway inbound, X-Webhook-Token secured) |
 | Notifications | `GET /api/notifications`, `/unread-count`, `/badge-counts`, `POST /{id}/read`, `/read-all` |
 
-Mutating endpoints require `ADMIN` or `ENGINEER`; `VIEWER` is read-only; user listing is
-admin-only. All plant-scoped reads verify plant membership.
+Mutating endpoints require `ADMIN` or `ENGINEER`; `VIEWER` is read-only; user and plant
+settings management is admin-only. All plant-scoped reads verify plant membership.
 
-## Out of scope (blueprint items marked optional / needs-confirmation)
+## WhatsApp inbound channel
 
-- `Organisation`, `AssistantConversation`/`AssistantMessage` entities (optional)
-- `WhatsAppWebhookController` and inbound webhooks (needs confirmation; the entry agent
-  is channel-agnostic and ready to be fronted by one)
-- User CRUD (`createUser`/`updateUser`/`deactivateUser`), `updatePlantSettings`,
-  `createMachine`/`updateMachine`, alias-suggestion `dismiss` (starred as needs
-  confirmation in the blueprint)
+`POST /api/webhooks/whatsapp` accepts `{from, text}` from any WhatsApp gateway
+(Twilio, Meta Cloud API adapter, etc.), authenticated by a shared secret in
+`X-Webhook-Token` (`app.whatsapp.webhook-token` / `WHATSAPP_WEBHOOK_TOKEN`; blank
+disables the endpoint with a 404). Senders are matched to users by their registered
+phone number, the message drives the same entry agent as the web channel (a confirm
+word saves an awaiting draft), and the response's `reply` field is the text the
+gateway should send back.
+
+## Assistant conversations
+
+Every `POST /api/assistant/ask` records the question and the flattened answer in a
+per-user conversation (pass `conversationId` to continue one);
+`GET /api/assistant/conversations` lists the user's recent threads and
+`GET /api/assistant/conversations/{id}` returns the full exchange with routed intents.
 
 ## Testing
 
-`mvn test` runs 23 integration tests (H2, real Spring context, real security filters):
-auth/token lifecycle, plant scoping and role enforcement, the import pipeline
-end-to-end (routing, validation queue, alias learning, duplicate rejection), record
-lifecycle and validation rules, analytics/KPI math, all plant-level detectors,
-assistant intent routing with real data, synonym search, and multi-turn entry-agent
-conversations.
+`mvn test` runs 30 integration tests (H2, real Spring context, real security filters):
+auth/token lifecycle, plant scoping and role enforcement, admin user management and
+deactivation semantics, plant-settings guardrails, machine CRUD with plant
+consistency, the import pipeline end-to-end (routing, validation queue, alias
+learning and dismissal, duplicate rejection), record lifecycle and validation rules,
+analytics/KPI math, all plant-level detectors, assistant intent routing and persisted
+conversations, synonym search, multi-turn entry-agent conversations, and the WhatsApp
+webhook end-to-end including token and sender rejection.

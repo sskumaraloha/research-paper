@@ -15,8 +15,10 @@ import com.mip.machine.repository.MachineAliasRepository;
 import com.mip.machine.repository.MachineRepository;
 import com.mip.part.entity.SparePart;
 import com.mip.part.repository.SparePartRepository;
+import com.mip.plant.entity.Organisation;
 import com.mip.plant.entity.Plant;
 import com.mip.plant.entity.ProductionLine;
+import com.mip.plant.repository.OrganisationRepository;
 import com.mip.plant.repository.PlantRepository;
 import com.mip.plant.repository.ProductionLineRepository;
 import com.mip.record.entity.MaintenanceRecord;
@@ -48,6 +50,7 @@ import java.util.Random;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
+    private final OrganisationRepository organisationRepository;
     private final PlantRepository plantRepository;
     private final ProductionLineRepository lineRepository;
     private final MachineRepository machineRepository;
@@ -71,8 +74,14 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seed() {
-        Plant pune = plantRepository.save(new Plant("PUNE", "Pune Plant", "Pune, MH"));
-        Plant nashik = plantRepository.save(new Plant("NASHIK", "Nashik Plant", "Nashik, MH"));
+        Organisation organisation = organisationRepository.save(
+                new Organisation("GENMFG", "General Manufacturing Co"));
+        Plant pune = new Plant("PUNE", "Pune Plant", "Pune, MH");
+        pune.setOrganisation(organisation);
+        pune = plantRepository.save(pune);
+        Plant nashik = new Plant("NASHIK", "Nashik Plant", "Nashik, MH");
+        nashik.setOrganisation(organisation);
+        nashik = plantRepository.save(nashik);
 
         ProductionLine puneA = lineRepository.save(new ProductionLine(pune, "L1", "Assembly Line 1"));
         ProductionLine puneB = lineRepository.save(new ProductionLine(pune, "L2", "Machining Line"));
@@ -145,8 +154,10 @@ public class DataSeeder implements CommandLineRunner {
 
         User admin = new User("Asha Admin", "admin@mip.local",
                 passwordEncoder.encode("Admin@123"), RoleName.ADMIN);
+        admin.setPhoneNumber("919999999999");
         User demo = new User("Dev Engineer", "demo@mip.local",
                 passwordEncoder.encode("Demo@123"), RoleName.ENGINEER);
+        demo.setPhoneNumber("919876543210");
         demo.getPlants().add(pune);
         demo.getPlants().add(nashik);
         User viewer = new User("Vikram Viewer", "viewer@mip.local",

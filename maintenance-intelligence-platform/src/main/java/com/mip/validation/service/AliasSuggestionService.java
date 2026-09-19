@@ -93,6 +93,26 @@ public class AliasSuggestionService {
                 suggestion.getRawText(), revalidated);
     }
 
+    /** Marks a suggestion as noise; the raw text will re-accumulate if it keeps appearing. */
+    @Transactional
+    public AliasSuggestionResponse dismiss(Long suggestionId, MipUserDetails principal) {
+        AliasSuggestion suggestion = suggestionRepository.findById(suggestionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Alias suggestion", suggestionId));
+        plantService.requireAccessiblePlant(suggestion.getPlant().getId(), principal);
+        if (suggestion.getStatus() != AliasSuggestion.SuggestionStatus.PENDING) {
+            throw new InvalidStateTransitionException(
+                    "This suggestion has already been " + suggestion.getStatus().name().toLowerCase());
+        }
+        suggestion.setStatus(AliasSuggestion.SuggestionStatus.DISMISSED);
+        log.info("Alias suggestion {} ('{}') dismissed by user {}", suggestionId,
+                suggestion.getRawText(), principal.getId());
+        return new AliasSuggestionResponse(suggestion.getId(), suggestion.getRawText(),
+                suggestion.getOccurrences(),
+                suggestion.getSuggestedMachine() == null ? null : suggestion.getSuggestedMachine().getId(),
+                suggestion.getSuggestedMachine() == null ? null : suggestion.getSuggestedMachine().getName(),
+                suggestion.getConfidence(), suggestion.getStatus().name());
+    }
+
     private NormalizedRow asNormalizedRow(StagedRow row) {
         return new NormalizedRow(row.getMachineText(), row.getParsedDate(), row.getDowntimeMinutes(),
                 row.getDescription(), row.getActionTaken(), row.getTechnician(),

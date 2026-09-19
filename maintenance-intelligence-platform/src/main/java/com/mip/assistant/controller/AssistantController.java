@@ -2,6 +2,7 @@ package com.mip.assistant.controller;
 
 import com.mip.assistant.dto.AskRequest;
 import com.mip.assistant.dto.AssistantAnswerResponse;
+import com.mip.assistant.dto.AssistantConversationResponse;
 import com.mip.assistant.service.AssistantService;
 import com.mip.assistant.service.SuggestionService;
 import com.mip.security.MipUserDetails;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +37,18 @@ public class AssistantController {
     public List<String> suggestions(@RequestParam Long plantId,
                                     @AuthenticationPrincipal MipUserDetails principal) {
         return suggestionService.suggestions(plantId, principal);
+    }
+
+    @GetMapping("/conversations")
+    public List<AssistantConversationResponse> listConversations(
+            @AuthenticationPrincipal MipUserDetails principal) {
+        return assistantService.listConversations(principal);
+    }
+
+    @GetMapping("/conversations/{conversationId}")
+    public AssistantConversationResponse getConversation(
+            @PathVariable Long conversationId,
+            @AuthenticationPrincipal MipUserDetails principal) {
+        return assistantService.getConversation(conversationId, principal);
     }
 }

@@ -17,6 +17,8 @@ app:
     refresh-token-days: 7
   demo:
     enabled: true
+  whatsapp:
+    webhook-token: test-webhook-token
   import:
     storage-dir: ${java.io.tmpdir}/mip-test-imports
 

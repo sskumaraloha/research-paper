@@ -1,5 +1,6 @@
 package com.mip.user.repository;
 
+import com.mip.user.entity.RoleName;
 import com.mip.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +14,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmailIgnoreCase(String email);
 
     List<User> findAllByOrderByFullNameAsc();
+
+    List<User> findByActiveTrueAndPlantsId(Long plantId);
+
+    List<User> findByActiveTrueAndRole(RoleName role);
 }

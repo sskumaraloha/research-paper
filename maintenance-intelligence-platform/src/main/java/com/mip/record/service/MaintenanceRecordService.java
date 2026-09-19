@@ -10,6 +10,7 @@ import com.mip.exception.InvalidStateTransitionException;
 import com.mip.exception.ResourceNotFoundException;
 import com.mip.machine.entity.Machine;
 import com.mip.machine.repository.MachineRepository;
+import com.mip.notification.service.NotificationService;
 import com.mip.part.service.SparePartService;
 import com.mip.plant.repository.ProductionLineRepository;
 import com.mip.plant.service.PlantService;
@@ -54,6 +55,7 @@ public class MaintenanceRecordService {
     private final SparePartService sparePartService;
     private final PlantService plantService;
     private final UserService userService;
+    private final NotificationService notificationService;
     private final RecordMapper recordMapper;
 
     @Transactional(readOnly = true)
@@ -97,9 +99,23 @@ public class MaintenanceRecordService {
         User creator = userService.getUser(principal.getId());
         MaintenanceRecord record = buildRecord(machine, request, RecordSource.MANUAL, creator, null);
         MaintenanceRecord saved = recordRepository.save(record);
+        notificationService.onRecordCreated(saved);
         log.info("Manual record {} created on machine {} by user {}", saved.getId(),
                 machine.getCode(), creator.getId());
         return recordMapper.toDetail(saved);
+    }
+
+    /** Record creation on behalf of the entry agent; the conversation already checked plant access. */
+    @Transactional
+    public MaintenanceRecord createRecordFromAgent(CreateRecordRequest request, User creator) {
+        Machine machine = machineRepository.findByIdAndPlantId(request.machineId(), request.plantId())
+                .orElseThrow(() -> new ResourceNotFoundException("Machine", request.machineId()));
+        MaintenanceRecord saved = recordRepository.save(
+                buildRecord(machine, request, RecordSource.ENTRY_AGENT, creator, null));
+        notificationService.onRecordCreated(saved);
+        log.info("Entry-agent record {} created on machine {} by user {}", saved.getId(),
+                machine.getCode(), creator.getId());
+        return saved;
     }
 
     /** Shared by manual entry and the entry agent; the import pipeline builds records itself. */

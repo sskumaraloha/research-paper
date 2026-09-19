@@ -14,6 +14,7 @@ import com.mip.importjob.entity.ImportJob;
 import com.mip.importjob.entity.ImportJobStatus;
 import com.mip.importjob.repository.ImportJobRepository;
 import com.mip.importjob.repository.ImportJobStepRepository;
+import com.mip.notification.service.NotificationService;
 import com.mip.plant.entity.Plant;
 import com.mip.plant.service.PlantService;
 import com.mip.record.entity.SourceDocument;
@@ -47,6 +48,7 @@ public class ImportService {
     private final ImportPipelineService pipelineService;
     private final PlantService plantService;
     private final UserService userService;
+    private final NotificationService notificationService;
     private final ImportProperties importProperties;
 
     /**
@@ -57,6 +59,7 @@ public class ImportService {
         Long jobId = createJob(plantId, file, principal);
         runPipeline(jobId);
         ImportJob job = jobRepository.findById(jobId).orElseThrow();
+        notificationService.onValidationPending(job);
         return new ImportSummaryResponse(job.getId(), job.getStatus().name(), job.getTotalRows(),
                 job.getAutoImportedCount(), job.getNeedsValidationCount(),
                 job.getRejectedCount(), job.getInvalidCount());
@@ -106,6 +109,7 @@ public class ImportService {
     public ImportJobResponse rerunJob(Long jobId, MipUserDetails principal) {
         prepareRerun(jobId, principal);
         runPipeline(jobId);
+        jobRepository.findById(jobId).ifPresent(notificationService::onValidationPending);
         return getJob(jobId, principal);
     }
 

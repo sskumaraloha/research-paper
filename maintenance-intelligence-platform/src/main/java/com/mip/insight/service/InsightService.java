@@ -6,6 +6,7 @@ import com.mip.insight.repository.InsightRepository;
 import com.mip.machine.entity.Machine;
 import com.mip.machine.repository.MachineRepository;
 import com.mip.machine.service.MachineService;
+import com.mip.notification.service.NotificationService;
 import com.mip.plant.entity.Plant;
 import com.mip.plant.service.PlantService;
 import com.mip.security.MipUserDetails;
@@ -27,6 +28,7 @@ public class InsightService {
     private final PatternDetectionService detectionService;
     private final PlantService plantService;
     private final MachineService machineService;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<InsightResponse> listInsights(Long plantId, MipUserDetails principal) {
@@ -75,6 +77,10 @@ public class InsightService {
         detectionService.detectDominantFailureMode(plant).ifPresent(fresh::add);
 
         insightRepository.saveAll(fresh);
+        long criticalCount = fresh.stream()
+                .filter(insight -> insight.getSeverity() == Insight.Severity.CRITICAL)
+                .count();
+        notificationService.onInsightChanged(plant, criticalCount);
         log.info("Recomputed insights for plant {}: {} found", plant.getCode(), fresh.size());
         return fresh.stream().map(this::toResponse).toList();
     }

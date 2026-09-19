@@ -98,7 +98,7 @@ public class NormalizationService {
         return null;
     }
 
-    LocalDate parseDate(String text) {
+    public LocalDate parseDate(String text) {
         if (text == null || text.isBlank()) {
             return null;
         }
@@ -113,7 +113,7 @@ public class NormalizationService {
         return null;
     }
 
-    Integer parseDowntimeMinutes(String text) {
+    public Integer parseDowntimeMinutes(String text) {
         if (text == null || text.isBlank()) {
             return null;
         }

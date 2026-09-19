@@ -1,6 +1,10 @@
 package com.mip.machine.controller;
 
+import com.mip.analytics.dto.MachineStatsResponse;
+import com.mip.analytics.service.AnalyticsService;
 import com.mip.common.dto.PageResponse;
+import com.mip.insight.dto.InsightResponse;
+import com.mip.insight.service.InsightService;
 import com.mip.machine.dto.AddAliasRequest;
 import com.mip.machine.dto.AliasResponse;
 import com.mip.machine.dto.MachineDetailResponse;
@@ -36,6 +40,8 @@ public class MachineController {
     private final MachineService machineService;
     private final MachineAliasService machineAliasService;
     private final MaintenanceRecordService recordService;
+    private final AnalyticsService analyticsService;
+    private final InsightService insightService;
 
     @GetMapping
     public PageResponse<MachineRowResponse> listMachines(
@@ -61,6 +67,25 @@ public class MachineController {
                                                        @RequestParam(defaultValue = "20") int size,
                                                        @AuthenticationPrincipal MipUserDetails principal) {
         return recordService.getMachineTimeline(machineId, page, size, principal);
+    }
+
+    @GetMapping("/{machineId}/stats")
+    public MachineStatsResponse getStats(@PathVariable Long machineId,
+                                         @AuthenticationPrincipal MipUserDetails principal) {
+        return analyticsService.machineStats(machineId, principal);
+    }
+
+    @GetMapping("/{machineId}/insights")
+    public List<InsightResponse> getInsights(@PathVariable Long machineId,
+                                             @AuthenticationPrincipal MipUserDetails principal) {
+        return insightService.getMachineInsights(machineId, principal);
+    }
+
+    @PostMapping("/{machineId}/insights/recompute")
+    @PreAuthorize("hasAnyRole('ADMIN','ENGINEER')")
+    public List<InsightResponse> recomputeInsights(@PathVariable Long machineId,
+                                                   @AuthenticationPrincipal MipUserDetails principal) {
+        return insightService.recomputeForMachine(machineId, principal);
     }
 
     @GetMapping("/{machineId}/aliases")

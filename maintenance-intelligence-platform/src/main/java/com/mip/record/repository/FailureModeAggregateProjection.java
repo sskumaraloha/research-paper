@@ -13,4 +13,6 @@ public interface FailureModeAggregateProjection {
     long getRecordCount();
 
     long getTotalDowntimeMinutes();
+
+    long getMachineCount();
 }

@@ -79,7 +79,8 @@ public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRe
     @Query("""
             select r.failureMode.id as failureModeId, r.failureMode.name as name,
                    r.failureMode.category as category,
-                   count(r) as recordCount, coalesce(sum(r.downtimeMinutes), 0) as totalDowntimeMinutes
+                   count(r) as recordCount, coalesce(sum(r.downtimeMinutes), 0) as totalDowntimeMinutes,
+                   count(distinct r.machine.id) as machineCount
             from MaintenanceRecord r
             where r.plant.id = :plantId and r.status = 'ACTIVE' and r.failureMode is not null
               and (:machineId is null or r.machine.id = :machineId)
@@ -174,4 +175,18 @@ public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRe
 
     List<MaintenanceRecord> findTop1ByMachineIdAndStatusOrderByRecordDateDescIdDesc(
             Long machineId, RecordStatus status);
+
+    List<MaintenanceRecord> findByMachineIdAndStatusAndRecordDateGreaterThanEqual(
+            Long machineId, RecordStatus status, LocalDate from);
+
+    @Query("""
+            select p.id as partId, p.name as partName, r.recordDate as recordDate,
+                   r.machine.id as machineId
+            from MaintenanceRecord r join r.spareParts p
+            where r.status = 'ACTIVE' and r.plant.id = :plantId
+              and (:machineId is null or r.machine.id = :machineId)
+            order by p.id, r.recordDate
+            """)
+    List<PartDateProjection> partUsageDates(@Param("plantId") Long plantId,
+                                            @Param("machineId") Long machineId);
 }

@@ -1,0 +1,1091 @@
+{
+  "openapi": "3.0.1",
+  "info": {"title": "Maintenance Intelligence Platform API", "description": "Plant maintenance records, intelligent import pipeline, analytics, insights, search and assistant", "version": "v1"},
+  "servers": [{"url": "http://localhost:8080", "description": "Generated server url"}],
+  "security": [{"bearerAuth": []}],
+  "paths": {
+    "/api/users/{userId}": {
+      "put": {"tags": ["user-controller"], "operationId": "updateUser",
+        "parameters": [{"name": "userId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdateUserRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/UserSummaryResponse"}}}}}}
+    },
+    "/api/schedules/{scheduleId}": {
+      "put": {"tags": ["schedule-controller"], "operationId": "updateSchedule",
+        "parameters": [{"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdateScheduleRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ScheduleResponse"}}}}}}
+    },
+    "/api/plants/{plantId}/settings": {
+      "get": {"tags": ["plant-controller"], "operationId": "getSettings",
+        "parameters": [{"name": "plantId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PlantSettingsResponse"}}}}}},
+      "put": {"tags": ["plant-controller"], "operationId": "updateSettings",
+        "parameters": [{"name": "plantId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdatePlantSettingsRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PlantSettingsResponse"}}}}}}
+    },
+    "/api/machines/{machineId}": {
+      "get": {"tags": ["machine-controller"], "operationId": "getMachine",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/MachineDetailResponse"}}}}}},
+      "put": {"tags": ["machine-controller"], "operationId": "updateMachine",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdateMachineRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/MachineDetailResponse"}}}}}}
+    },
+    "/api/webhooks/whatsapp": {
+      "post": {"tags": ["whats-app-webhook-controller"], "operationId": "inbound",
+        "parameters": [{"name": "X-Webhook-Token", "in": "header", "required": false, "schema": {"type": "string"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/WhatsAppInboundRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/WhatsAppReplyResponse"}}}}}}
+    },
+    "/api/validation/{itemId}/reject": {
+      "post": {"tags": ["validation-controller"], "operationId": "reject",
+        "parameters": [{"name": "itemId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RejectRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ValidationDecisionResponse"}}}}}}
+    },
+    "/api/validation/{itemId}/edit-approve": {
+      "post": {"tags": ["validation-controller"], "operationId": "editAndApprove",
+        "parameters": [{"name": "itemId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/EditValidationItemRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ValidationDecisionResponse"}}}}}}
+    },
+    "/api/validation/{itemId}/approve": {
+      "post": {"tags": ["validation-controller"], "operationId": "approve",
+        "parameters": [{"name": "itemId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ValidationDecisionResponse"}}}}}}
+    },
+    "/api/validation/alias-suggestions/{suggestionId}/map": {
+      "post": {"tags": ["validation-controller"], "operationId": "mapAlias",
+        "parameters": [{"name": "suggestionId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/MapAliasRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AliasMappingResponse"}}}}}}
+    },
+    "/api/validation/alias-suggestions/{suggestionId}/dismiss": {
+      "post": {"tags": ["validation-controller"], "operationId": "dismissAlias",
+        "parameters": [{"name": "suggestionId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AliasSuggestionResponse"}}}}}}
+    },
+    "/api/users": {
+      "get": {"tags": ["user-controller"], "operationId": "listUsers",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/UserSummaryResponse"}}}}}}},
+      "post": {"tags": ["user-controller"], "operationId": "createUser",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateUserRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/UserSummaryResponse"}}}}}}
+    },
+    "/api/users/{userId}/deactivate": {
+      "post": {"tags": ["user-controller"], "operationId": "deactivateUser",
+        "parameters": [{"name": "userId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/UserSummaryResponse"}}}}}}
+    },
+    "/api/schedules": {
+      "get": {"tags": ["schedule-controller"], "operationId": "listSchedules",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "includeInactive", "in": "query", "required": false, "schema": {"type": "boolean", "default": false}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/ScheduleResponse"}}}}}}},
+      "post": {"tags": ["schedule-controller"], "operationId": "createSchedule",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateScheduleRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ScheduleResponse"}}}}}}
+    },
+    "/api/schedules/{scheduleId}/complete": {
+      "post": {"tags": ["schedule-controller"], "operationId": "completeSchedule",
+        "parameters": [{"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/CompleteScheduleRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ScheduleResponse"}}}}}}
+    },
+    "/api/records": {
+      "get": {"tags": ["maintenance-record-controller"], "operationId": "listRecords",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "machineId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "lineId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "failureModeId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "text", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponseRecordRowResponse"}}}}}},
+      "post": {"tags": ["maintenance-record-controller"], "operationId": "createRecord",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateRecordRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/RecordDetailResponse"}}}}}}
+    },
+    "/api/records/{recordId}/reject": {
+      "post": {"tags": ["maintenance-record-controller"], "operationId": "rejectRecord",
+        "parameters": [{"name": "recordId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RejectRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/RecordDetailResponse"}}}}}}
+    },
+    "/api/notifications/{notificationId}/read": {
+      "post": {"tags": ["notification-controller"], "operationId": "markRead",
+        "parameters": [{"name": "notificationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/NotificationResponse"}}}}}}
+    },
+    "/api/notifications/read-all": {
+      "post": {"tags": ["notification-controller"], "operationId": "markAllRead",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/CountResponse"}}}}}}
+    },
+    "/api/machines": {
+      "get": {"tags": ["machine-controller"], "operationId": "listMachines",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "query", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "lineId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "criticality", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponseMachineRowResponse"}}}}}},
+      "post": {"tags": ["machine-controller"], "operationId": "createMachine",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/CreateMachineRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/MachineDetailResponse"}}}}}}
+    },
+    "/api/machines/{machineId}/insights/recompute": {
+      "post": {"tags": ["machine-controller"], "operationId": "recomputeInsights",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/InsightResponse"}}}}}}}
+    },
+    "/api/machines/{machineId}/aliases": {
+      "get": {"tags": ["machine-controller"], "operationId": "listAliases",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/AliasResponse"}}}}}}},
+      "post": {"tags": ["machine-controller"], "operationId": "addAlias",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/AddAliasRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AliasResponse"}}}}}}
+    },
+    "/api/insights/recompute": {
+      "post": {"tags": ["insight-controller"], "operationId": "recomputeAll",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/InsightResponse"}}}}}}}
+    },
+    "/api/imports/{jobId}/rerun": {
+      "post": {"tags": ["import-controller"], "operationId": "rerunJob",
+        "parameters": [{"name": "jobId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ImportJobResponse"}}}}}}
+    },
+    "/api/imports/upload": {
+      "post": {"tags": ["import-controller"], "operationId": "uploadFile",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"required": ["file"], "type": "object", "properties": {"file": {"type": "string", "format": "binary"}}}}}},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ImportSummaryResponse"}}}}}}
+    },
+    "/api/entry/conversations": {
+      "post": {"tags": ["entry-agent-controller"], "operationId": "startConversation",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/StartConversationRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/EntryConversationResponse"}}}}}}
+    },
+    "/api/entry/conversations/{conversationId}/request-edit": {
+      "post": {"tags": ["entry-agent-controller"], "operationId": "requestEdit",
+        "parameters": [{"name": "conversationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/EntryConversationResponse"}}}}}}
+    },
+    "/api/entry/conversations/{conversationId}/messages": {
+      "post": {"tags": ["entry-agent-controller"], "operationId": "sendMessage",
+        "parameters": [{"name": "conversationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/EntryMessageRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/EntryConversationResponse"}}}}}}
+    },
+    "/api/entry/conversations/{conversationId}/confirm": {
+      "post": {"tags": ["entry-agent-controller"], "operationId": "confirm",
+        "parameters": [{"name": "conversationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/EntryConversationResponse"}}}}}}
+    },
+    "/api/auth/reset-password": {
+      "post": {"tags": ["auth-controller"], "operationId": "resetPassword",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ResetPasswordRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/SimpleMessageResponse"}}}}}}
+    },
+    "/api/auth/register": {
+      "post": {"tags": ["auth-controller"], "operationId": "register",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RegistrationRequest"}}}, "required": true},
+        "responses": {"201": {"description": "Created", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AuthResponse"}}}}}}
+    },
+    "/api/auth/refresh": {
+      "post": {"tags": ["auth-controller"], "operationId": "refresh",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RefreshRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AuthResponse"}}}}}}
+    },
+    "/api/auth/logout": {
+      "post": {"tags": ["auth-controller"], "operationId": "logout",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/RefreshRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK"}}}
+    },
+    "/api/auth/login": {
+      "post": {"tags": ["auth-controller"], "operationId": "login",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/LoginRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AuthResponse"}}}}}}
+    },
+    "/api/auth/forgot-password": {
+      "post": {"tags": ["auth-controller"], "operationId": "forgotPassword",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/ForgotPasswordRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/SimpleMessageResponse"}}}}}}
+    },
+    "/api/auth/demo-login": {
+      "post": {"tags": ["auth-controller"], "operationId": "demoLogin",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AuthResponse"}}}}}}
+    },
+    "/api/assistant/ask": {
+      "post": {"tags": ["assistant-controller"], "operationId": "ask",
+        "requestBody": {"content": {"application/json": {"schema": {"$ref": "#/components/schemas/AskRequest"}}}, "required": true},
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AssistantAnswerResponse"}}}}}}
+    },
+    "/api/validation/queue": {
+      "get": {"tags": ["validation-controller"], "operationId": "getQueue",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ValidationQueueResponse"}}}}}}
+    },
+    "/api/validation/pending-count": {
+      "get": {"tags": ["validation-controller"], "operationId": "pendingCount",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/CountResponse"}}}}}}
+    },
+    "/api/validation/alias-suggestions": {
+      "get": {"tags": ["validation-controller"], "operationId": "listAliasSuggestions",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/AliasSuggestionResponse"}}}}}}}
+    },
+    "/api/users/roles": {
+      "get": {"tags": ["user-controller"], "operationId": "listRoles",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/RoleDefinitionResponse"}}}}}}}
+    },
+    "/api/search": {
+      "get": {"tags": ["search-controller"], "operationId": "globalSearch",
+        "parameters": [{"name": "query", "in": "query", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/GlobalSearchResponse"}}}}}}
+    },
+    "/api/search/records": {
+      "get": {"tags": ["search-controller"], "operationId": "searchRecords",
+        "parameters": [{"name": "query", "in": "query", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/RecordMatchResponse"}}}}}}}
+    },
+    "/api/search/machines": {
+      "get": {"tags": ["search-controller"], "operationId": "searchMachines",
+        "parameters": [{"name": "query", "in": "query", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/MachineMatch"}}}}}}}
+    },
+    "/api/schedules/due": {
+      "get": {"tags": ["schedule-controller"], "operationId": "listDue",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/ScheduleResponse"}}}}}}}
+    },
+    "/api/records/{recordId}": {
+      "get": {"tags": ["maintenance-record-controller"], "operationId": "getRecord",
+        "parameters": [{"name": "recordId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/RecordDetailResponse"}}}}}}
+    },
+    "/api/records/source-documents": {
+      "get": {"tags": ["maintenance-record-controller"], "operationId": "listSourceDocuments",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/SourceDocumentResponse"}}}}}}}
+    },
+    "/api/records/filter-options": {
+      "get": {"tags": ["maintenance-record-controller"], "operationId": "listFilterOptions",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/RecordFilterOptionsResponse"}}}}}}
+    },
+    "/api/records/export": {
+      "get": {"tags": ["maintenance-record-controller"], "operationId": "exportRecords",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "machineId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "lineId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "failureModeId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "text", "in": "query", "required": false, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "string"}}}}}}
+    },
+    "/api/platform/overview": {
+      "get": {"tags": ["platform-admin-controller"], "operationId": "overview",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PlatformOverviewResponse"}}}}}}
+    },
+    "/api/platform/organisations": {
+      "get": {"tags": ["platform-admin-controller"], "operationId": "listOrganisations",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/OrganisationStatsResponse"}}}}}}}
+    },
+    "/api/platform/organisations/{organisationId}": {
+      "get": {"tags": ["platform-admin-controller"], "operationId": "getOrganisation",
+        "parameters": [{"name": "organisationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/OrganisationDetailResponse"}}}}}}
+    },
+    "/api/plants": {
+      "get": {"tags": ["plant-controller"], "operationId": "listPlants",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/PlantSummaryResponse"}}}}}}}
+    },
+    "/api/plants/{plantId}/lines": {
+      "get": {"tags": ["plant-controller"], "operationId": "listLines",
+        "parameters": [{"name": "plantId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/LineResponse"}}}}}}}
+    },
+    "/api/parts": {
+      "get": {"tags": ["spare-part-controller"], "operationId": "listParts",
+        "parameters": [
+          {"name": "query", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponsePartRowResponse"}}}}}}
+    },
+    "/api/parts/{partId}": {
+      "get": {"tags": ["spare-part-controller"], "operationId": "getPartDetail",
+        "parameters": [{"name": "partId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PartDetailResponse"}}}}}}
+    },
+    "/api/notifications": {
+      "get": {"tags": ["notification-controller"], "operationId": "listForUser",
+        "parameters": [
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponseNotificationResponse"}}}}}}
+    },
+    "/api/notifications/unread-count": {
+      "get": {"tags": ["notification-controller"], "operationId": "unreadCount",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/CountResponse"}}}}}}
+    },
+    "/api/notifications/badge-counts": {
+      "get": {"tags": ["notification-controller"], "operationId": "badgeCounts",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/BadgeCountsResponse"}}}}}}
+    },
+    "/api/machines/{machineId}/timeline": {
+      "get": {"tags": ["machine-controller"], "operationId": "getTimeline",
+        "parameters": [
+          {"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 20}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponseRecordRowResponse"}}}}}}
+    },
+    "/api/machines/{machineId}/stats": {
+      "get": {"tags": ["machine-controller"], "operationId": "getStats",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/MachineStatsResponse"}}}}}}
+    },
+    "/api/machines/{machineId}/insights": {
+      "get": {"tags": ["machine-controller"], "operationId": "getInsights",
+        "parameters": [{"name": "machineId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/InsightResponse"}}}}}}}
+    },
+    "/api/insights": {
+      "get": {"tags": ["insight-controller"], "operationId": "listInsights",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/InsightResponse"}}}}}}}
+    },
+    "/api/insights/count": {
+      "get": {"tags": ["insight-controller"], "operationId": "insightCount",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/CountResponse"}}}}}}
+    },
+    "/api/imports/{jobId}": {
+      "get": {"tags": ["import-controller"], "operationId": "getJob",
+        "parameters": [{"name": "jobId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ImportJobResponse"}}}}}}
+    },
+    "/api/imports/latest": {
+      "get": {"tags": ["import-controller"], "operationId": "getLatestJob",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/ImportJobResponse"}}}}}}
+    },
+    "/api/entry/conversations/{conversationId}": {
+      "get": {"tags": ["entry-agent-controller"], "operationId": "getConversation",
+        "parameters": [{"name": "conversationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/EntryConversationResponse"}}}}}}
+    },
+    "/api/dashboard/kpis": {
+      "get": {"tags": ["dashboard-controller"], "operationId": "plantKpis",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PlantKpiResponse"}}}}}}
+    },
+    "/api/config/failure-modes": {
+      "get": {"tags": ["config-controller"], "operationId": "listFailureModes",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/FailureModeResponse"}}}}}}}
+    },
+    "/api/config/dictionary": {
+      "get": {"tags": ["config-controller"], "operationId": "getDictionary",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "object", "additionalProperties": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}}}}}}}}
+    },
+    "/api/auth/reset-password/validate": {
+      "get": {"tags": ["auth-controller"], "operationId": "validateResetToken",
+        "parameters": [{"name": "token", "in": "query", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/SimpleMessageResponse"}}}}}}
+    },
+    "/api/auth/me": {
+      "get": {"tags": ["auth-controller"], "operationId": "me",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/UserProfileResponse"}}}}}}
+    },
+    "/api/audit": {
+      "get": {"tags": ["audit-controller"], "operationId": "list",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": false, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "action", "in": "query", "required": false, "schema": {"type": "string"}},
+          {"name": "page", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 0}},
+          {"name": "size", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 50}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/PageResponseAuditLogResponse"}}}}}}
+    },
+    "/api/assistant/suggestions": {
+      "get": {"tags": ["assistant-controller"], "operationId": "suggestions",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"type": "string"}}}}}}}
+    },
+    "/api/assistant/conversations": {
+      "get": {"tags": ["assistant-controller"], "operationId": "listConversations",
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/AssistantConversationResponse"}}}}}}}
+    },
+    "/api/assistant/conversations/{conversationId}": {
+      "get": {"tags": ["assistant-controller"], "operationId": "getConversation_1",
+        "parameters": [{"name": "conversationId", "in": "path", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/AssistantConversationResponse"}}}}}}
+    },
+    "/api/analytics/top-downtime-machines": {
+      "get": {"tags": ["analytics-controller"], "operationId": "topMachinesByDowntime",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "limit", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 5}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/MachineDowntimeResponse"}}}}}}}
+    },
+    "/api/analytics/part-replacement-intervals": {
+      "get": {"tags": ["analytics-controller"], "operationId": "partReplacementIntervals",
+        "parameters": [{"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/PartIntervalResponse"}}}}}}}
+    },
+    "/api/analytics/pareto": {
+      "get": {"tags": ["analytics-controller"], "operationId": "pareto",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/ParetoBucketResponse"}}}}}}}
+    },
+    "/api/analytics/line-downtime-share": {
+      "get": {"tags": ["analytics-controller"], "operationId": "lineDowntimeShare",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/LineDowntimeShareResponse"}}}}}}}
+    },
+    "/api/analytics/failure-mode-stats": {
+      "get": {"tags": ["analytics-controller"], "operationId": "failureModeStats",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "from", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}},
+          {"name": "to", "in": "query", "required": false, "schema": {"type": "string", "format": "date"}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/FailureModeStatsResponse"}}}}}}}
+    },
+    "/api/analytics/downtime-trend": {
+      "get": {"tags": ["analytics-controller"], "operationId": "downtimeTrend",
+        "parameters": [
+          {"name": "plantId", "in": "query", "required": true, "schema": {"type": "integer", "format": "int64"}},
+          {"name": "months", "in": "query", "required": false, "schema": {"type": "integer", "format": "int32", "default": 6}}],
+        "responses": {"200": {"description": "OK", "content": {"*/*": {"schema": {"$ref": "#/components/schemas/TrendResponse"}}}}}}
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateUserRequest": {"type": "object", "properties": {
+        "fullName": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "role": {"type": "string"},
+        "phoneNumber": {"pattern": "\\+?[0-9]{8,15}", "type": "string"},
+        "plantIds": {"type": "array", "items": {"type": "integer", "format": "int64"}},
+        "active": {"type": "boolean"}}},
+      "UserSummaryResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "fullName": {"type": "string"},
+        "email": {"type": "string"},
+        "phoneNumber": {"type": "string"},
+        "role": {"type": "string"},
+        "active": {"type": "boolean"},
+        "plantIds": {"type": "array", "items": {"type": "integer", "format": "int64"}}}},
+      "UpdateScheduleRequest": {"type": "object", "properties": {
+        "title": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "description": {"maxLength": 1000, "minLength": 0, "type": "string"},
+        "intervalDays": {"maximum": 3650, "minimum": 1, "type": "integer", "format": "int32"},
+        "nextDueOn": {"type": "string", "format": "date"},
+        "active": {"type": "boolean"}}},
+      "ScheduleResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineName": {"type": "string"},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "intervalDays": {"type": "integer", "format": "int32"},
+        "lastPerformedOn": {"type": "string", "format": "date"},
+        "nextDueOn": {"type": "string", "format": "date"},
+        "daysUntilDue": {"type": "integer", "format": "int64"},
+        "status": {"type": "string"},
+        "active": {"type": "boolean"}}},
+      "UpdatePlantSettingsRequest": {"required": ["autoApproveThreshold", "downtimeAlertMinutes", "lowConfidenceThreshold"], "type": "object", "properties": {
+        "autoApproveThreshold": {"maximum": 1, "exclusiveMaximum": false, "minimum": 0, "exclusiveMinimum": false, "type": "number", "format": "double"},
+        "lowConfidenceThreshold": {"maximum": 1, "exclusiveMaximum": false, "minimum": 0, "exclusiveMinimum": false, "type": "number", "format": "double"},
+        "downtimeAlertMinutes": {"type": "integer", "format": "int32"}}},
+      "PlantSettingsResponse": {"type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "plantName": {"type": "string"},
+        "autoApproveThreshold": {"type": "number", "format": "double"},
+        "lowConfidenceThreshold": {"type": "number", "format": "double"},
+        "downtimeAlertMinutes": {"type": "integer", "format": "int32"}}},
+      "UpdateMachineRequest": {"type": "object", "properties": {
+        "name": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "lineId": {"type": "integer", "format": "int64"},
+        "manufacturer": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "model": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "criticality": {"type": "string"},
+        "commissionedOn": {"type": "string", "format": "date"},
+        "active": {"type": "boolean"}}},
+      "AliasResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "alias": {"type": "string"},
+        "source": {"type": "string"}}},
+      "MachineDetailResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "plantName": {"type": "string"},
+        "lineId": {"type": "integer", "format": "int64"},
+        "lineName": {"type": "string"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "manufacturer": {"type": "string"},
+        "model": {"type": "string"},
+        "criticality": {"type": "string"},
+        "commissionedOn": {"type": "string", "format": "date"},
+        "active": {"type": "boolean"},
+        "status": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "totalDowntimeMinutes": {"type": "integer", "format": "int64"},
+        "lastMaintenanceDate": {"type": "string", "format": "date"},
+        "aliases": {"type": "array", "items": {"$ref": "#/components/schemas/AliasResponse"}}}},
+      "WhatsAppInboundRequest": {"required": ["from", "text"], "type": "object", "properties": {
+        "from": {"maxLength": 20, "minLength": 0, "type": "string"},
+        "text": {"maxLength": 1000, "minLength": 0, "type": "string"}}},
+      "WhatsAppReplyResponse": {"type": "object", "properties": {
+        "conversationId": {"type": "integer", "format": "int64"},
+        "status": {"type": "string"},
+        "reply": {"type": "string"}}},
+      "RejectRequest": {"required": ["reason"], "type": "object", "properties": {
+        "reason": {"maxLength": 500, "minLength": 0, "type": "string"}}},
+      "ValidationDecisionResponse": {"type": "object", "properties": {
+        "itemId": {"type": "integer", "format": "int64"},
+        "status": {"type": "string"},
+        "recordId": {"type": "integer", "format": "int64"}}},
+      "EditValidationItemRequest": {"type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"},
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "description": {"maxLength": 2000, "minLength": 0, "type": "string"},
+        "actionTaken": {"maxLength": 2000, "minLength": 0, "type": "string"},
+        "technician": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "partNames": {"type": "array", "items": {"type": "string"}}}},
+      "MapAliasRequest": {"required": ["machineId"], "type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"}}},
+      "AliasMappingResponse": {"type": "object", "properties": {
+        "suggestionId": {"type": "integer", "format": "int64"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "alias": {"type": "string"},
+        "revalidatedItemCount": {"type": "integer", "format": "int32"}}},
+      "AliasSuggestionResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "rawText": {"type": "string"},
+        "occurrences": {"type": "integer", "format": "int32"},
+        "suggestedMachineId": {"type": "integer", "format": "int64"},
+        "suggestedMachineName": {"type": "string"},
+        "confidence": {"type": "number", "format": "double"},
+        "status": {"type": "string"}}},
+      "CreateUserRequest": {"required": ["email", "fullName", "password", "role"], "type": "object", "properties": {
+        "fullName": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "email": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "password": {"maxLength": 100, "minLength": 8, "type": "string"},
+        "role": {"type": "string"},
+        "phoneNumber": {"pattern": "\\+?[0-9]{8,15}", "type": "string"},
+        "plantIds": {"type": "array", "items": {"type": "integer", "format": "int64"}}}},
+      "CreateScheduleRequest": {"required": ["machineId", "title"], "type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"},
+        "title": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "description": {"maxLength": 1000, "minLength": 0, "type": "string"},
+        "intervalDays": {"maximum": 3650, "minimum": 1, "type": "integer", "format": "int32"},
+        "firstDueOn": {"type": "string", "format": "date"}}},
+      "CompleteScheduleRequest": {"type": "object", "properties": {
+        "performedOn": {"type": "string", "format": "date"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "notes": {"maxLength": 2000, "minLength": 0, "type": "string"},
+        "technician": {"maxLength": 100, "minLength": 0, "type": "string"}}},
+      "CreateRecordRequest": {"required": ["description", "machineId", "plantId", "recordDate"], "type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "description": {"maxLength": 2000, "minLength": 0, "type": "string"},
+        "actionTaken": {"maxLength": 2000, "minLength": 0, "type": "string"},
+        "technician": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "failureModeText": {"maxLength": 200, "minLength": 0, "type": "string"},
+        "partNames": {"type": "array", "items": {"type": "string"}}}},
+      "NamedRef": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "name": {"type": "string"}}},
+      "RecordDetailResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineCode": {"type": "string"},
+        "machineName": {"type": "string"},
+        "lineName": {"type": "string"},
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "failureMode": {"type": "string"},
+        "failureModeCategory": {"type": "string"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "description": {"type": "string"},
+        "actionTaken": {"type": "string"},
+        "technician": {"type": "string"},
+        "source": {"type": "string"},
+        "status": {"type": "string"},
+        "confidence": {"type": "number", "format": "double"},
+        "rejectedReason": {"type": "string"},
+        "spareParts": {"type": "array", "items": {"$ref": "#/components/schemas/NamedRef"}},
+        "sourceDocumentId": {"type": "integer", "format": "int64"},
+        "sourceDocumentName": {"type": "string"},
+        "createdByName": {"type": "string"}}},
+      "NotificationResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "type": {"type": "string"},
+        "title": {"type": "string"},
+        "message": {"type": "string"},
+        "entityType": {"type": "string"},
+        "entityId": {"type": "integer", "format": "int64"},
+        "read": {"type": "boolean"},
+        "createdAt": {"type": "string", "format": "date-time"}}},
+      "CountResponse": {"type": "object", "properties": {
+        "count": {"type": "integer", "format": "int64"}}},
+      "CreateMachineRequest": {"required": ["code", "name", "plantId"], "type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "lineId": {"type": "integer", "format": "int64"},
+        "code": {"maxLength": 30, "minLength": 0, "type": "string"},
+        "name": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "manufacturer": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "model": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "criticality": {"type": "string"},
+        "commissionedOn": {"type": "string", "format": "date"}}},
+      "Evidence": {"type": "object", "properties": {
+        "recordId": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "description": {"type": "string"},
+        "note": {"type": "string"}}},
+      "InsightResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "type": {"type": "string"},
+        "severity": {"type": "string"},
+        "title": {"type": "string"},
+        "detail": {"type": "string"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineName": {"type": "string"},
+        "metricValue": {"type": "number", "format": "double"},
+        "windowDays": {"type": "integer", "format": "int32"},
+        "computedAt": {"type": "string", "format": "date-time"},
+        "evidence": {"type": "array", "items": {"$ref": "#/components/schemas/Evidence"}}}},
+      "AddAliasRequest": {"required": ["alias"], "type": "object", "properties": {
+        "alias": {"maxLength": 150, "minLength": 0, "type": "string"}}},
+      "ImportJobResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "sourceDocumentId": {"type": "integer", "format": "int64"},
+        "filename": {"type": "string"},
+        "status": {"type": "string"},
+        "totalRows": {"type": "integer", "format": "int32"},
+        "autoImportedCount": {"type": "integer", "format": "int32"},
+        "needsValidationCount": {"type": "integer", "format": "int32"},
+        "rejectedCount": {"type": "integer", "format": "int32"},
+        "invalidCount": {"type": "integer", "format": "int32"},
+        "errorMessage": {"type": "string"},
+        "startedAt": {"type": "string", "format": "date-time"},
+        "finishedAt": {"type": "string", "format": "date-time"},
+        "steps": {"type": "array", "items": {"$ref": "#/components/schemas/ImportStepResponse"}}}},
+      "ImportStepResponse": {"type": "object", "properties": {
+        "name": {"type": "string"},
+        "status": {"type": "string"},
+        "processedCount": {"type": "integer", "format": "int32"},
+        "message": {"type": "string"},
+        "startedAt": {"type": "string", "format": "date-time"},
+        "finishedAt": {"type": "string", "format": "date-time"}}},
+      "ImportSummaryResponse": {"type": "object", "properties": {
+        "jobId": {"type": "integer", "format": "int64"},
+        "status": {"type": "string"},
+        "totalRows": {"type": "integer", "format": "int32"},
+        "autoImportedCount": {"type": "integer", "format": "int32"},
+        "needsValidationCount": {"type": "integer", "format": "int32"},
+        "rejectedCount": {"type": "integer", "format": "int32"},
+        "invalidCount": {"type": "integer", "format": "int32"}}},
+      "StartConversationRequest": {"required": ["plantId"], "type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "message": {"maxLength": 1000, "minLength": 0, "type": "string"}}},
+      "EntryConversationResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "status": {"type": "string"},
+        "draft": {"$ref": "#/components/schemas/EntryDraftResponse"},
+        "messages": {"type": "array", "items": {"$ref": "#/components/schemas/EntryMessageResponse"}},
+        "resultingRecordId": {"type": "integer", "format": "int64"}}},
+      "EntryDraftResponse": {"type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineName": {"type": "string"},
+        "machineText": {"type": "string"},
+        "recordDate": {"type": "string", "format": "date"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "description": {"type": "string"},
+        "actionTaken": {"type": "string"},
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "failureMode": {"type": "string"},
+        "partsText": {"type": "string"},
+        "missingFields": {"type": "array", "items": {"type": "string"}}}},
+      "EntryMessageResponse": {"type": "object", "properties": {
+        "sender": {"type": "string"},
+        "content": {"type": "string"},
+        "createdAt": {"type": "string", "format": "date-time"}}},
+      "EntryMessageRequest": {"required": ["message"], "type": "object", "properties": {
+        "message": {"maxLength": 1000, "minLength": 0, "type": "string"}}},
+      "ResetPasswordRequest": {"required": ["newPassword", "token"], "type": "object", "properties": {
+        "token": {"type": "string"},
+        "newPassword": {"maxLength": 100, "minLength": 8, "type": "string"}}},
+      "SimpleMessageResponse": {"type": "object", "properties": {
+        "message": {"type": "string"}}},
+      "RegistrationRequest": {"required": ["email", "fullName", "password"], "type": "object", "properties": {
+        "fullName": {"maxLength": 100, "minLength": 0, "type": "string"},
+        "email": {"maxLength": 150, "minLength": 0, "type": "string"},
+        "password": {"maxLength": 100, "minLength": 8, "type": "string"},
+        "phoneNumber": {"pattern": "\\+?[0-9]{8,15}", "type": "string"}}},
+      "AuthResponse": {"type": "object", "properties": {
+        "accessToken": {"type": "string"},
+        "refreshToken": {"type": "string"},
+        "expiresInSeconds": {"type": "integer", "format": "int64"},
+        "user": {"$ref": "#/components/schemas/UserProfileResponse"}}},
+      "UserProfileResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "fullName": {"type": "string"},
+        "email": {"type": "string"},
+        "role": {"type": "string"},
+        "plantIds": {"type": "array", "items": {"type": "integer", "format": "int64"}}}},
+      "RefreshRequest": {"required": ["refreshToken"], "type": "object", "properties": {
+        "refreshToken": {"type": "string"}}},
+      "LoginRequest": {"required": ["email", "password"], "type": "object", "properties": {
+        "email": {"type": "string"},
+        "password": {"type": "string"}}},
+      "ForgotPasswordRequest": {"required": ["email"], "type": "object", "properties": {
+        "email": {"type": "string"}}},
+      "AskRequest": {"required": ["plantId", "question"], "type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "question": {"maxLength": 500, "minLength": 0, "type": "string"},
+        "conversationId": {"type": "integer", "format": "int64"}}},
+      "AnswerSection": {"type": "object", "properties": {
+        "heading": {"type": "string"},
+        "text": {"type": "string"}}},
+      "AssistantAnswerResponse": {"type": "object", "properties": {
+        "intent": {"type": "string"},
+        "title": {"type": "string"},
+        "tiles": {"type": "array", "items": {"$ref": "#/components/schemas/StatTile"}},
+        "sections": {"type": "array", "items": {"$ref": "#/components/schemas/AnswerSection"}},
+        "records": {"type": "array", "items": {"$ref": "#/components/schemas/RecordRowResponse"}},
+        "followUps": {"type": "array", "items": {"type": "string"}},
+        "conversationId": {"type": "integer", "format": "int64"}}},
+      "RecordRowResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineCode": {"type": "string"},
+        "machineName": {"type": "string"},
+        "failureMode": {"type": "string"},
+        "failureModeCategory": {"type": "string"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "technician": {"type": "string"},
+        "source": {"type": "string"},
+        "status": {"type": "string"},
+        "confidence": {"type": "number", "format": "double"},
+        "description": {"type": "string"}}},
+      "StatTile": {"type": "object", "properties": {
+        "label": {"type": "string"},
+        "value": {"type": "string"},
+        "unit": {"type": "string"}}},
+      "PageResponseValidationItemResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/ValidationItemResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "ValidationItemResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "jobId": {"type": "integer", "format": "int64"},
+        "sourceFilename": {"type": "string"},
+        "rowNumber": {"type": "integer", "format": "int32"},
+        "reasons": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": "number", "format": "double"},
+        "machineText": {"type": "string"},
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineName": {"type": "string"},
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "failureModeName": {"type": "string"},
+        "recordDate": {"type": "string", "format": "date"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "description": {"type": "string"},
+        "actionTaken": {"type": "string"},
+        "technician": {"type": "string"},
+        "partsText": {"type": "string"},
+        "rawData": {"type": "object", "additionalProperties": {"type": "string"}}}},
+      "ValidationQueueResponse": {"type": "object", "properties": {
+        "pendingCount": {"type": "integer", "format": "int64"},
+        "items": {"$ref": "#/components/schemas/PageResponseValidationItemResponse"}}},
+      "RoleDefinitionResponse": {"type": "object", "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"}}},
+      "FailureModeMatch": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"}}},
+      "GlobalSearchResponse": {"type": "object", "properties": {
+        "query": {"type": "string"},
+        "machines": {"type": "array", "items": {"$ref": "#/components/schemas/MachineMatch"}},
+        "records": {"type": "array", "items": {"$ref": "#/components/schemas/RecordMatchResponse"}},
+        "parts": {"type": "array", "items": {"$ref": "#/components/schemas/PartMatch"}},
+        "failureModes": {"type": "array", "items": {"$ref": "#/components/schemas/FailureModeMatch"}}}},
+      "MachineMatch": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "plantName": {"type": "string"}}},
+      "PartMatch": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "partNumber": {"type": "string"},
+        "name": {"type": "string"}}},
+      "RecordMatchResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "recordDate": {"type": "string", "format": "date"},
+        "machineName": {"type": "string"},
+        "failureMode": {"type": "string"},
+        "downtimeMinutes": {"type": "integer", "format": "int32"},
+        "snippet": {"type": "string"}}},
+      "PageResponseRecordRowResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/RecordRowResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "SourceDocumentResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "filename": {"type": "string"},
+        "contentType": {"type": "string"},
+        "sizeBytes": {"type": "integer", "format": "int64"},
+        "uploadedByName": {"type": "string"},
+        "uploadedAt": {"type": "string", "format": "date-time"}}},
+      "RecordFilterOptionsResponse": {"type": "object", "properties": {
+        "machines": {"type": "array", "items": {"$ref": "#/components/schemas/NamedRef"}},
+        "lines": {"type": "array", "items": {"$ref": "#/components/schemas/NamedRef"}},
+        "failureModes": {"type": "array", "items": {"$ref": "#/components/schemas/NamedRef"}}}},
+      "PlatformOverviewResponse": {"type": "object", "properties": {
+        "organisations": {"type": "integer", "format": "int64"},
+        "plants": {"type": "integer", "format": "int64"},
+        "users": {"type": "integer", "format": "int64"},
+        "machines": {"type": "integer", "format": "int64"},
+        "maintenanceRecords": {"type": "integer", "format": "int64"},
+        "recordsLast30Days": {"type": "integer", "format": "int64"},
+        "importJobs": {"type": "integer", "format": "int64"},
+        "pendingValidations": {"type": "integer", "format": "int64"}}},
+      "OrganisationStatsResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "plantCount": {"type": "integer", "format": "int64"},
+        "userCount": {"type": "integer", "format": "int64"},
+        "machineCount": {"type": "integer", "format": "int64"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "importJobCount": {"type": "integer", "format": "int64"},
+        "lastActivityAt": {"type": "string", "format": "date-time"}}},
+      "OrganisationDetailResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "plants": {"type": "array", "items": {"$ref": "#/components/schemas/PlantStats"}},
+        "users": {"type": "array", "items": {"$ref": "#/components/schemas/UserSummaryResponse"}}}},
+      "PlantStats": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "machineCount": {"type": "integer", "format": "int64"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "downtimeLast30DaysMinutes": {"type": "integer", "format": "int64"},
+        "pendingValidations": {"type": "integer", "format": "int64"}}},
+      "PlantSummaryResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "location": {"type": "string"},
+        "organisationName": {"type": "string"}}},
+      "LineResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"}}},
+      "PageResponsePartRowResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/PartRowResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "PartRowResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "partNumber": {"type": "string"},
+        "name": {"type": "string"},
+        "category": {"type": "string"},
+        "usageCount": {"type": "integer", "format": "int64"},
+        "lastUsedDate": {"type": "string", "format": "date"}}},
+      "PartDetailResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "partNumber": {"type": "string"},
+        "name": {"type": "string"},
+        "category": {"type": "string"},
+        "usageCount": {"type": "integer", "format": "int64"},
+        "lastUsedDate": {"type": "string", "format": "date"},
+        "avgReplacementIntervalDays": {"type": "number", "format": "double"},
+        "machinesUsedOn": {"type": "array", "items": {"$ref": "#/components/schemas/NamedRef"}},
+        "recentRecords": {"type": "array", "items": {"$ref": "#/components/schemas/RecordRowResponse"}}}},
+      "PageResponseNotificationResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/NotificationResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "BadgeCountsResponse": {"type": "object", "properties": {
+        "pendingValidation": {"type": "integer", "format": "int64"},
+        "unreadNotifications": {"type": "integer", "format": "int64"},
+        "insights": {"type": "integer", "format": "int64"}}},
+      "MachineRowResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "lineName": {"type": "string"},
+        "criticality": {"type": "string"},
+        "status": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "totalDowntimeMinutes": {"type": "integer", "format": "int64"},
+        "lastMaintenanceDate": {"type": "string", "format": "date"}}},
+      "PageResponseMachineRowResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/MachineRowResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "FailureModeStatsResponse": {"type": "object", "properties": {
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "name": {"type": "string"},
+        "category": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "totalDowntimeMinutes": {"type": "integer", "format": "int64"},
+        "avgDowntimeMinutes": {"type": "number", "format": "double"},
+        "machinesAffected": {"type": "integer", "format": "int64"}}},
+      "MachineStatsResponse": {"type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineCode": {"type": "string"},
+        "machineName": {"type": "string"},
+        "status": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "totalDowntimeMinutes": {"type": "integer", "format": "int64"},
+        "avgDowntimeMinutes": {"type": "number", "format": "double"},
+        "mtbfDays": {"type": "number", "format": "double"},
+        "lastMaintenanceDate": {"type": "string", "format": "date"},
+        "topFailureModes": {"type": "array", "items": {"$ref": "#/components/schemas/FailureModeStatsResponse"}}}},
+      "KpiValue": {"type": "object", "properties": {
+        "key": {"type": "string"},
+        "label": {"type": "string"},
+        "value": {"type": "number", "format": "double"},
+        "previousValue": {"type": "number", "format": "double"},
+        "changePct": {"type": "number", "format": "double"}}},
+      "PlantKpiResponse": {"type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "windowFrom": {"type": "string", "format": "date"},
+        "windowTo": {"type": "string", "format": "date"},
+        "kpis": {"type": "array", "items": {"$ref": "#/components/schemas/KpiValue"}}}},
+      "FailureModeResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "code": {"type": "string"},
+        "name": {"type": "string"},
+        "category": {"type": "string"},
+        "keywords": {"type": "array", "items": {"type": "string"}}}},
+      "AuditLogResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "actorId": {"type": "integer", "format": "int64"},
+        "actorName": {"type": "string"},
+        "action": {"type": "string"},
+        "entityType": {"type": "string"},
+        "entityId": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "detail": {"type": "string"},
+        "occurredAt": {"type": "string", "format": "date-time"}}},
+      "PageResponseAuditLogResponse": {"type": "object", "properties": {
+        "content": {"type": "array", "items": {"$ref": "#/components/schemas/AuditLogResponse"}},
+        "page": {"type": "integer", "format": "int32"},
+        "size": {"type": "integer", "format": "int32"},
+        "totalElements": {"type": "integer", "format": "int64"},
+        "totalPages": {"type": "integer", "format": "int32"},
+        "first": {"type": "boolean"},
+        "last": {"type": "boolean"}}},
+      "AssistantConversationResponse": {"type": "object", "properties": {
+        "id": {"type": "integer", "format": "int64"},
+        "plantId": {"type": "integer", "format": "int64"},
+        "title": {"type": "string"},
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "messages": {"type": "array", "items": {"$ref": "#/components/schemas/AssistantMessageResponse"}}}},
+      "AssistantMessageResponse": {"type": "object", "properties": {
+        "sender": {"type": "string"},
+        "content": {"type": "string"},
+        "intent": {"type": "string"},
+        "createdAt": {"type": "string", "format": "date-time"}}},
+      "MachineDowntimeResponse": {"type": "object", "properties": {
+        "machineId": {"type": "integer", "format": "int64"},
+        "machineCode": {"type": "string"},
+        "machineName": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "downtimeMinutes": {"type": "integer", "format": "int64"}}},
+      "PartIntervalResponse": {"type": "object", "properties": {
+        "partId": {"type": "integer", "format": "int64"},
+        "partName": {"type": "string"},
+        "usageCount": {"type": "integer", "format": "int64"},
+        "avgIntervalDays": {"type": "number", "format": "double"}}},
+      "ParetoBucketResponse": {"type": "object", "properties": {
+        "failureModeId": {"type": "integer", "format": "int64"},
+        "failureMode": {"type": "string"},
+        "category": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "downtimeMinutes": {"type": "integer", "format": "int64"},
+        "downtimeSharePct": {"type": "number", "format": "double"},
+        "cumulativeSharePct": {"type": "number", "format": "double"}}},
+      "LineDowntimeShareResponse": {"type": "object", "properties": {
+        "lineId": {"type": "integer", "format": "int64"},
+        "lineName": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "downtimeMinutes": {"type": "integer", "format": "int64"},
+        "sharePct": {"type": "number", "format": "double"}}},
+      "TrendPoint": {"type": "object", "properties": {
+        "yearMonth": {"type": "string"},
+        "recordCount": {"type": "integer", "format": "int64"},
+        "downtimeMinutes": {"type": "integer", "format": "int64"}}},
+      "TrendResponse": {"type": "object", "properties": {
+        "plantId": {"type": "integer", "format": "int64"},
+        "points": {"type": "array", "items": {"$ref": "#/components/schemas/TrendPoint"}}}}
+    },
+    "securitySchemes": {
+      "bearerAuth": {"type": "http", "name": "bearerAuth", "scheme": "bearer", "bearerFormat": "JWT"}
+    }
+  }
+}
